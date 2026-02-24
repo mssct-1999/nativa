@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Concerns\BuildsMonthlyMetrics;
 use App\Models\Inventory;
 use Illuminate\Http\Request;
 
 class InventoryController extends Controller
 {
+    use BuildsMonthlyMetrics;
+
     /**
      * Display a listing of the resource.
      *
@@ -14,7 +17,23 @@ class InventoryController extends Controller
      */
     public function index()
     {
-        //
+        $chart = $this->monthlyCountSeries(Inventory::class);
+
+        return view('inventory.index', [
+            'pageDescription' => 'Watch stock levels, reorder risk, and inventory additions.',
+            'metrics' => [
+                ['label' => 'Inventory records', 'value' => number_format(Inventory::query()->count())],
+                ['label' => 'Total quantity', 'value' => number_format((float) Inventory::query()->sum('quantity'), 0)],
+                ['label' => 'Reserved quantity', 'value' => number_format((float) Inventory::query()->sum('reserved'), 0)],
+                ['label' => 'Below reorder point', 'value' => number_format(Inventory::query()->whereColumn('quantity', '<=', 'reorder_point')->count())],
+                ['label' => 'Growth vs last month', 'value' => $this->monthlyTrend($chart['values'])],
+            ],
+            'chart' => [
+                'label' => 'Inventory records created (last 6 months)',
+                'labels' => $chart['labels'],
+                'values' => $chart['values'],
+            ],
+        ]);
     }
 
     /**

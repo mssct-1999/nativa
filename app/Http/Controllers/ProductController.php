@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Concerns\BuildsMonthlyMetrics;
 use App\Models\Product;
 use Illuminate\Http\Request;
 
 class ProductController extends Controller
 {
+    use BuildsMonthlyMetrics;
+
     /**
      * Display a listing of the resource.
      *
@@ -14,7 +17,22 @@ class ProductController extends Controller
      */
     public function index()
     {
-        //
+        $chart = $this->monthlyCountSeries(Product::class);
+
+        return view('products.index', [
+            'pageDescription' => 'Monitor catalog size, pricing profile, and recent product additions.',
+            'metrics' => [
+                ['label' => 'Total products', 'value' => number_format(Product::query()->count())],
+                ['label' => 'Active products', 'value' => number_format(Product::query()->where('active', true)->count())],
+                ['label' => 'Avg. price', 'value' => '$'.number_format((float) Product::query()->avg('price'), 2)],
+                ['label' => 'Growth vs last month', 'value' => $this->monthlyTrend($chart['values'])],
+            ],
+            'chart' => [
+                'label' => 'Products created (last 6 months)',
+                'labels' => $chart['labels'],
+                'values' => $chart['values'],
+            ],
+        ]);
     }
 
     /**

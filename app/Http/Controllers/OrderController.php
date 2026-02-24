@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Concerns\BuildsMonthlyMetrics;
 use App\Models\Order;
 use Illuminate\Http\Request;
 
 class OrderController extends Controller
 {
+    use BuildsMonthlyMetrics;
+
     /**
      * Display a listing of the resource.
      *
@@ -14,7 +17,23 @@ class OrderController extends Controller
      */
     public function index()
     {
-        //
+        $chart = $this->monthlyCountSeries(Order::class);
+
+        return view('orders.index', [
+            'pageDescription' => 'See order velocity, pipeline status, and revenue volume.',
+            'metrics' => [
+                ['label' => 'Total orders', 'value' => number_format(Order::query()->count())],
+                ['label' => 'Pending orders', 'value' => number_format(Order::query()->where('status', 'pending')->count())],
+                ['label' => 'Shipped orders', 'value' => number_format(Order::query()->whereNotNull('shipped_at')->count())],
+                ['label' => 'Order value', 'value' => '$'.number_format((float) Order::query()->sum('total'), 2)],
+                ['label' => 'Growth vs last month', 'value' => $this->monthlyTrend($chart['values'])],
+            ],
+            'chart' => [
+                'label' => 'Orders created (last 6 months)',
+                'labels' => $chart['labels'],
+                'values' => $chart['values'],
+            ],
+        ]);
     }
 
     /**

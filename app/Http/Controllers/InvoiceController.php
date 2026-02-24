@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Concerns\BuildsMonthlyMetrics;
 use App\Models\Invoice;
 use Illuminate\Http\Request;
 
 class InvoiceController extends Controller
 {
+    use BuildsMonthlyMetrics;
+
     /**
      * Display a listing of the resource.
      *
@@ -14,7 +17,23 @@ class InvoiceController extends Controller
      */
     public function index()
     {
-        //
+        $chart = $this->monthlyCountSeries(Invoice::class);
+
+        return view('invoices.index', [
+            'pageDescription' => 'Track billing throughput and payment collection health.',
+            'metrics' => [
+                ['label' => 'Total invoices', 'value' => number_format(Invoice::query()->count())],
+                ['label' => 'Paid invoices', 'value' => number_format(Invoice::query()->where('status', 'paid')->count())],
+                ['label' => 'Outstanding amount', 'value' => '$'.number_format((float) Invoice::query()->where('status', '!=', 'paid')->sum('total'), 2)],
+                ['label' => 'Issued in 30 days', 'value' => number_format(Invoice::query()->where('created_at', '>=', now()->subDays(30))->count())],
+                ['label' => 'Growth vs last month', 'value' => $this->monthlyTrend($chart['values'])],
+            ],
+            'chart' => [
+                'label' => 'Invoices created (last 6 months)',
+                'labels' => $chart['labels'],
+                'values' => $chart['values'],
+            ],
+        ]);
     }
 
     /**

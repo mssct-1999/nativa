@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Concerns\BuildsMonthlyMetrics;
 use App\Models\Client;
 use Illuminate\Http\Request;
 
 class ClientController extends Controller
 {
+    use BuildsMonthlyMetrics;
+
     /**
      * Display a listing of the resource.
      *
@@ -14,7 +17,22 @@ class ClientController extends Controller
      */
     public function index()
     {
-        return view('clients.index');
+        $chart = $this->monthlyCountSeries(Client::class);
+
+        return view('clients.index', [
+            'pageDescription' => 'Track acquisition and contact quality for your customer base.',
+            'metrics' => [
+                ['label' => 'Total clients', 'value' => number_format(Client::query()->count())],
+                ['label' => 'New in 30 days', 'value' => number_format(Client::query()->where('created_at', '>=', now()->subDays(30))->count())],
+                ['label' => 'With email', 'value' => number_format(Client::query()->whereNotNull('email')->count())],
+                ['label' => 'Growth vs last month', 'value' => $this->monthlyTrend($chart['values'])],
+            ],
+            'chart' => [
+                'label' => 'Clients added (last 6 months)',
+                'labels' => $chart['labels'],
+                'values' => $chart['values'],
+            ],
+        ]);
     }
 
     /**

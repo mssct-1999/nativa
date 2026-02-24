@@ -1,47 +1,38 @@
-<nav x-data="{ open: false }" class="bg-white border-r border-gray-100 w-64 hidden sm:flex flex-col">
-    <div class="flex flex-col h-full">
-        <div class="py-6 px-4 flex items-center border-b border-gray-200">
+@php
+    $menuItems = [
+        ['label' => 'Dashboard', 'route' => 'dashboard', 'active' => 'dashboard'],
+        ['label' => 'Clients', 'route' => 'clients.index', 'active' => 'clients.*'],
+        ['label' => 'Products', 'route' => 'products.index', 'active' => 'products.*'],
+        ['label' => 'Orders', 'route' => 'orders.index', 'active' => 'orders.*'],
+        ['label' => 'Invoices', 'route' => 'invoices.index', 'active' => 'invoices.*'],
+        ['label' => 'Inventory', 'route' => 'inventory.index', 'active' => 'inventory.*'],
+        ['label' => 'Employees', 'route' => 'employees.index', 'active' => 'employees.*'],
+    ];
+@endphp
+
+<aside class="hidden lg:flex lg:w-72 lg:flex-col lg:bg-white lg:border-r lg:border-slate-200 lg:min-h-screen">
+    <div class="sticky top-0 flex h-screen flex-col">
+        <div class="px-5 py-6 border-b border-slate-200">
             <a href="{{ route('dashboard') }}" class="flex items-center">
-                <x-application-logo class="block h-10 w-auto fill-current text-gray-600" />
-                <span class="ml-3 font-semibold">Nativa</span>
+                <x-application-logo class="block h-10 w-auto fill-current text-emerald-600" />
+                <span class="ml-3 text-lg font-bold tracking-tight text-slate-900">Nativa</span>
             </a>
+            <p class="mt-2 text-xs font-medium uppercase tracking-wide text-slate-400">Operations Center</p>
         </div>
 
-        <div class="flex-1 overflow-y-auto px-2 py-4 flex flex-col">
-            <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                {{ __('Dashboard') }}
-            </x-nav-link>
-
-            <x-nav-link :href="route('clients.index')" :active="request()->routeIs('clients.*')">
-                {{ __('Clients') }}
-            </x-nav-link>
-
-            <x-nav-link :href="route('products.index')" :active="request()->routeIs('products.*')">
-                {{ __('Products') }}
-            </x-nav-link>
-
-            <x-nav-link :href="route('orders.index')" :active="request()->routeIs('orders.*')">
-                {{ __('Orders') }}
-            </x-nav-link>
-
-            <x-nav-link :href="route('invoices.index')" :active="request()->routeIs('invoices.*')">
-                {{ __('Invoices') }}
-            </x-nav-link>
-
-            <x-nav-link :href="route('inventory.index')" :active="request()->routeIs('inventory.*')">
-                {{ __('Inventory') }}
-            </x-nav-link>
-
-            <x-nav-link :href="route('employees.index')" :active="request()->routeIs('employees.*')">
-                {{ __('Employees') }}
-            </x-nav-link>
+        <div class="flex-1 overflow-y-auto px-3 py-5 space-y-1">
+            @foreach ($menuItems as $item)
+                <x-nav-link :href="route($item['route'])" :active="request()->routeIs($item['active'])">
+                    {{ __($item['label']) }}
+                </x-nav-link>
+            @endforeach
         </div>
 
-        <div class="px-4 py-4 border-t border-gray-200">
+        <div class="px-4 py-4 border-t border-slate-200">
             <x-dropdown align="right" width="48">
                 <x-slot name="trigger">
-                    <button class="flex items-center text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300 focus:outline-none focus:text-gray-700 transition duration-150 ease-in-out w-full">
-                        <div class="text-left flex-1">{{ Auth::user()->name }}</div>
+                    <button class="flex items-center w-full rounded-lg border border-slate-200 px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 transition">
+                        <div class="text-left flex-1 truncate">{{ Auth::user()->name }}</div>
 
                         <div class="ml-2">
                             <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
@@ -65,21 +56,21 @@
             </x-dropdown>
         </div>
     </div>
-</nav>
+</aside>
 
 <!-- Mobile top nav (visible on small screens) -->
-<div x-data="{ open: false }" class="sm:hidden bg-white border-b border-gray-100">
+<div x-data="{ open: false }" class="lg:hidden bg-white border-b border-slate-200 shadow-sm">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16">
             <div class="flex items-center">
                 <a href="{{ route('dashboard') }}" class="flex items-center">
-                    <x-application-logo class="block h-8 w-auto fill-current text-gray-600" />
-                    <span class="ml-2 font-semibold">{{ config('app.name', 'App') }}</span>
+                    <x-application-logo class="block h-8 w-auto fill-current text-emerald-600" />
+                    <span class="ml-2 font-semibold text-slate-900">{{ config('app.name', 'App') }}</span>
                 </a>
             </div>
 
             <div class="flex items-center">
-                <button @click="open = ! open" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none">
+                <button @click="open = ! open" class="inline-flex items-center justify-center p-2 rounded-md text-slate-500 hover:text-slate-700 hover:bg-slate-100 focus:outline-none">
                     <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
                         <path :class="{'hidden': open, 'inline-flex': ! open }" class="inline-flex" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
                         <path :class="{'hidden': ! open, 'inline-flex': open }" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -90,18 +81,16 @@
     </div>
 
     <div x-show="open" x-cloak class="pt-2 pb-3 space-y-1">
-        <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">{{ __('Dashboard') }}</x-responsive-nav-link>
-        <x-responsive-nav-link :href="route('clients.index')" :active="request()->routeIs('clients.*')">{{ __('Clients') }}</x-responsive-nav-link>
-        <x-responsive-nav-link :href="route('products.index')" :active="request()->routeIs('products.*')">{{ __('Products') }}</x-responsive-nav-link>
-        <x-responsive-nav-link :href="route('orders.index')" :active="request()->routeIs('orders.*')">{{ __('Orders') }}</x-responsive-nav-link>
-        <x-responsive-nav-link :href="route('invoices.index')" :active="request()->routeIs('invoices.*')">{{ __('Invoices') }}</x-responsive-nav-link>
-        <x-responsive-nav-link :href="route('inventory.index')" :active="request()->routeIs('inventory.*')">{{ __('Inventory') }}</x-responsive-nav-link>
-        <x-responsive-nav-link :href="route('employees.index')" :active="request()->routeIs('employees.*')">{{ __('Employees') }}</x-responsive-nav-link>
+        @foreach ($menuItems as $item)
+            <x-responsive-nav-link :href="route($item['route'])" :active="request()->routeIs($item['active'])">
+                {{ __($item['label']) }}
+            </x-responsive-nav-link>
+        @endforeach
 
-        <div class="pt-4 pb-1 border-t border-gray-200">
+        <div class="pt-4 pb-1 border-t border-slate-200">
             <div class="px-4">
-                <div class="font-medium text-base text-gray-800">{{ Auth::user()->name }}</div>
-                <div class="font-medium text-sm text-gray-500">{{ Auth::user()->email }}</div>
+                <div class="font-medium text-base text-slate-800">{{ Auth::user()->name }}</div>
+                <div class="font-medium text-sm text-slate-500">{{ Auth::user()->email }}</div>
             </div>
 
             <div class="mt-3 space-y-1">
