@@ -6,6 +6,6 @@
     </x-slot>
 
     <div class="max-w-7xl mx-auto">
-        <x-index-overview :description="$pageDescription" :metrics="$metrics" :chart="$chart" />
+        <x-index-overview :description="$pageDescription" :metrics="$metrics" :chart="$chart" :list-route="route('orders.list')" />
     </div>
 </x-app-layout>

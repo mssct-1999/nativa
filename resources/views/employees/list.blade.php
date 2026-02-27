@@ -1,0 +1,64 @@
+<x-app-layout>
+    <x-slot name="header">
+        <div class="flex items-center justify-between gap-4">
+            <h2 class="font-semibold text-xl text-slate-900 leading-tight">
+                {{ __('Employees List') }}
+            </h2>
+            <a href="{{ route('employees.create') }}" class="inline-flex items-center rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-500">
+                Add new employee
+            </a>
+        </div>
+    </x-slot>
+
+    <div class="max-w-7xl mx-auto space-y-4">
+        @if (session('status'))
+            <div class="rounded-md border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+                {{ session('status') }}
+            </div>
+        @endif
+
+        <div class="rounded-xl border border-slate-200 bg-white shadow-sm overflow-x-auto">
+            <table class="min-w-full text-sm">
+                <thead class="bg-slate-50 text-slate-600">
+                    <tr>
+                        <th class="px-4 py-3 text-left">Employee #</th>
+                        <th class="px-4 py-3 text-left">User</th>
+                        <th class="px-4 py-3 text-left">Position</th>
+                        <th class="px-4 py-3 text-left">Department</th>
+                        <th class="px-4 py-3 text-left">Status</th>
+                        <th class="px-4 py-3 text-left">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    @forelse ($employees as $employee)
+                        <tr>
+                            <td class="px-4 py-3">{{ $employee->employee_number ?: '-' }}</td>
+                            <td class="px-4 py-3">{{ $employee->user?->name ?: '-' }}</td>
+                            <td class="px-4 py-3">{{ $employee->position ?: '-' }}</td>
+                            <td class="px-4 py-3">{{ $employee->department ?: '-' }}</td>
+                            <td class="px-4 py-3">{{ ucfirst($employee->status) }}</td>
+                            <td class="px-4 py-3">
+                                <div class="flex items-center gap-3">
+                                    <a href="{{ route('employees.edit', $employee) }}" class="text-amber-600 hover:text-amber-700 font-medium">Edit</a>
+                                    <form method="POST" action="{{ route('employees.destroy', $employee) }}" onsubmit="return confirm('Delete this employee?');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="text-red-600 hover:text-red-700 font-medium">Delete</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="6" class="px-4 py-6 text-center text-slate-500">No employees found.</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+
+        <div>
+            {{ $employees->links() }}
+        </div>
+    </div>
+</x-app-layout>

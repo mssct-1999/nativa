@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Concerns\BuildsMonthlyMetrics;
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class ProductController extends Controller
 {
@@ -36,13 +37,25 @@ class ProductController extends Controller
     }
 
     /**
+     * Display the full list view used for CRUD operations.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function list()
+    {
+        return view('products.list', [
+            'products' => Product::query()->latest()->paginate(15),
+        ]);
+    }
+
+    /**
      * Show the form for creating a new resource.
      *
      * @return \Illuminate\Http\Response
      */
     public function create()
     {
-        //
+        return view('products.create');
     }
 
     /**
@@ -53,7 +66,20 @@ class ProductController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'sku' => ['nullable', 'string', 'max:255', 'unique:products,sku'],
+            'name' => ['required', 'string', 'max:255'],
+            'description' => ['nullable', 'string'],
+            'price' => ['required', 'numeric', 'min:0'],
+            'cost' => ['required', 'numeric', 'min:0'],
+        ]);
+
+        $validated['taxable'] = $request->boolean('taxable');
+        $validated['active'] = $request->boolean('active');
+
+        Product::create($validated);
+
+        return redirect()->route('products.list')->with('status', 'Product created successfully.');
     }
 
     /**
@@ -75,7 +101,7 @@ class ProductController extends Controller
      */
     public function edit(Product $product)
     {
-        //
+        return view('products.edit', compact('product'));
     }
 
     /**
@@ -87,7 +113,20 @@ class ProductController extends Controller
      */
     public function update(Request $request, Product $product)
     {
-        //
+        $validated = $request->validate([
+            'sku' => ['nullable', 'string', 'max:255', Rule::unique('products', 'sku')->ignore($product->id)],
+            'name' => ['required', 'string', 'max:255'],
+            'description' => ['nullable', 'string'],
+            'price' => ['required', 'numeric', 'min:0'],
+            'cost' => ['required', 'numeric', 'min:0'],
+        ]);
+
+        $validated['taxable'] = $request->boolean('taxable');
+        $validated['active'] = $request->boolean('active');
+
+        $product->update($validated);
+
+        return redirect()->route('products.list')->with('status', 'Product updated successfully.');
     }
 
     /**
@@ -98,6 +137,8 @@ class ProductController extends Controller
      */
     public function destroy(Product $product)
     {
-        //
+        $product->delete();
+
+        return redirect()->route('products.list')->with('status', 'Product deleted successfully.');
     }
 }

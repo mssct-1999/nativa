@@ -4,7 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Concerns\BuildsMonthlyMetrics;
 use App\Models\Inventory;
+use App\Models\Product;
+use App\Models\Warehouse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class InventoryController extends Controller
 {
@@ -37,13 +40,28 @@ class InventoryController extends Controller
     }
 
     /**
+     * Display the full list view used for CRUD operations.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function list()
+    {
+        return view('inventory.list', [
+            'inventories' => Inventory::query()->with(['product', 'warehouse'])->latest()->paginate(15),
+        ]);
+    }
+
+    /**
      * Show the form for creating a new resource.
      *
      * @return \Illuminate\Http\Response
      */
     public function create()
     {
-        //
+        return view('inventory.create', [
+            'products' => Product::query()->orderBy('name')->get(),
+            'warehouses' => Warehouse::query()->orderBy('name')->get(),
+        ]);
     }
 
     /**
@@ -54,7 +72,25 @@ class InventoryController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'product_id' => ['required', 'exists:products,id'],
+            'warehouse_id' => [
+                'required',
+                'exists:warehouses,id',
+                Rule::unique('inventories')->where(function ($query) use ($request) {
+                    return $query->where('product_id', $request->input('product_id'));
+                }),
+            ],
+            'quantity' => ['required', 'numeric', 'min:0'],
+            'reserved' => ['required', 'numeric', 'min:0'],
+            'reorder_point' => ['required', 'numeric', 'min:0'],
+        ], [
+            'warehouse_id.unique' => 'This product is already registered for the selected warehouse.',
+        ]);
+
+        Inventory::create($validated);
+
+        return redirect()->route('inventory.list')->with('status', 'Inventory record created successfully.');
     }
 
     /**
@@ -76,7 +112,11 @@ class InventoryController extends Controller
      */
     public function edit(Inventory $inventory)
     {
-        //
+        return view('inventory.edit', [
+            'inventory' => $inventory,
+            'products' => Product::query()->orderBy('name')->get(),
+            'warehouses' => Warehouse::query()->orderBy('name')->get(),
+        ]);
     }
 
     /**
@@ -88,7 +128,25 @@ class InventoryController extends Controller
      */
     public function update(Request $request, Inventory $inventory)
     {
-        //
+        $validated = $request->validate([
+            'product_id' => ['required', 'exists:products,id'],
+            'warehouse_id' => [
+                'required',
+                'exists:warehouses,id',
+                Rule::unique('inventories')->where(function ($query) use ($request) {
+                    return $query->where('product_id', $request->input('product_id'));
+                })->ignore($inventory->id),
+            ],
+            'quantity' => ['required', 'numeric', 'min:0'],
+            'reserved' => ['required', 'numeric', 'min:0'],
+            'reorder_point' => ['required', 'numeric', 'min:0'],
+        ], [
+            'warehouse_id.unique' => 'This product is already registered for the selected warehouse.',
+        ]);
+
+        $inventory->update($validated);
+
+        return redirect()->route('inventory.list')->with('status', 'Inventory record updated successfully.');
     }
 
     /**
@@ -99,6 +157,8 @@ class InventoryController extends Controller
      */
     public function destroy(Inventory $inventory)
     {
-        //
+        $inventory->delete();
+
+        return redirect()->route('inventory.list')->with('status', 'Inventory record deleted successfully.');
     }
 }

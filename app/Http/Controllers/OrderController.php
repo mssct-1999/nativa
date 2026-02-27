@@ -3,8 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Concerns\BuildsMonthlyMetrics;
+use App\Models\Client;
 use App\Models\Order;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class OrderController extends Controller
 {
@@ -37,13 +40,29 @@ class OrderController extends Controller
     }
 
     /**
+     * Display the full list view used for CRUD operations.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function list()
+    {
+        return view('orders.list', [
+            'orders' => Order::query()->with(['client', 'user'])->latest()->paginate(15),
+        ]);
+    }
+
+    /**
      * Show the form for creating a new resource.
      *
      * @return \Illuminate\Http\Response
      */
     public function create()
     {
-        //
+        return view('orders.create', [
+            'clients' => Client::query()->orderBy('company_name')->get(),
+            'users' => User::query()->orderBy('name')->get(),
+            'statuses' => ['pending', 'processing', 'completed', 'cancelled'],
+        ]);
     }
 
     /**
@@ -54,7 +73,20 @@ class OrderController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'number' => ['required', 'string', 'max:255', 'unique:orders,number'],
+            'client_id' => ['nullable', 'exists:clients,id'],
+            'created_by' => ['nullable', 'exists:users,id'],
+            'status' => ['required', Rule::in(['pending', 'processing', 'completed', 'cancelled'])],
+            'total' => ['required', 'numeric', 'min:0'],
+            'ordered_at' => ['nullable', 'date'],
+            'shipped_at' => ['nullable', 'date'],
+            'notes' => ['nullable', 'string'],
+        ]);
+
+        Order::create($validated);
+
+        return redirect()->route('orders.list')->with('status', 'Order created successfully.');
     }
 
     /**
@@ -76,7 +108,12 @@ class OrderController extends Controller
      */
     public function edit(Order $order)
     {
-        //
+        return view('orders.edit', [
+            'order' => $order,
+            'clients' => Client::query()->orderBy('company_name')->get(),
+            'users' => User::query()->orderBy('name')->get(),
+            'statuses' => ['pending', 'processing', 'completed', 'cancelled'],
+        ]);
     }
 
     /**
@@ -88,7 +125,20 @@ class OrderController extends Controller
      */
     public function update(Request $request, Order $order)
     {
-        //
+        $validated = $request->validate([
+            'number' => ['required', 'string', 'max:255', Rule::unique('orders', 'number')->ignore($order->id)],
+            'client_id' => ['nullable', 'exists:clients,id'],
+            'created_by' => ['nullable', 'exists:users,id'],
+            'status' => ['required', Rule::in(['pending', 'processing', 'completed', 'cancelled'])],
+            'total' => ['required', 'numeric', 'min:0'],
+            'ordered_at' => ['nullable', 'date'],
+            'shipped_at' => ['nullable', 'date'],
+            'notes' => ['nullable', 'string'],
+        ]);
+
+        $order->update($validated);
+
+        return redirect()->route('orders.list')->with('status', 'Order updated successfully.');
     }
 
     /**
@@ -99,6 +149,8 @@ class OrderController extends Controller
      */
     public function destroy(Order $order)
     {
-        //
+        $order->delete();
+
+        return redirect()->route('orders.list')->with('status', 'Order deleted successfully.');
     }
 }

@@ -3,8 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Concerns\BuildsMonthlyMetrics;
+use App\Models\Client;
 use App\Models\Invoice;
+use App\Models\Quote;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class InvoiceController extends Controller
 {
@@ -37,13 +41,30 @@ class InvoiceController extends Controller
     }
 
     /**
+     * Display the full list view used for CRUD operations.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function list()
+    {
+        return view('invoices.list', [
+            'invoices' => Invoice::query()->with(['client', 'user'])->latest()->paginate(15),
+        ]);
+    }
+
+    /**
      * Show the form for creating a new resource.
      *
      * @return \Illuminate\Http\Response
      */
     public function create()
     {
-        //
+        return view('invoices.create', [
+            'clients' => Client::query()->orderBy('company_name')->get(),
+            'quotes' => Quote::query()->orderBy('number')->get(),
+            'users' => User::query()->orderBy('name')->get(),
+            'statuses' => ['draft', 'issued', 'paid', 'overdue', 'cancelled'],
+        ]);
     }
 
     /**
@@ -54,7 +75,25 @@ class InvoiceController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'number' => ['required', 'string', 'max:255', 'unique:invoices,number'],
+            'client_id' => ['nullable', 'exists:clients,id'],
+            'quote_id' => ['nullable', 'exists:quotes,id'],
+            'created_by' => ['nullable', 'exists:users,id'],
+            'status' => ['required', Rule::in(['draft', 'issued', 'paid', 'overdue', 'cancelled'])],
+            'sub_total' => ['required', 'numeric', 'min:0'],
+            'tax' => ['required', 'numeric', 'min:0'],
+            'discount' => ['required', 'numeric', 'min:0'],
+            'total' => ['required', 'numeric', 'min:0'],
+            'issued_at' => ['nullable', 'date'],
+            'due_at' => ['nullable', 'date'],
+            'paid_at' => ['nullable', 'date'],
+            'notes' => ['nullable', 'string'],
+        ]);
+
+        Invoice::create($validated);
+
+        return redirect()->route('invoices.list')->with('status', 'Invoice created successfully.');
     }
 
     /**
@@ -76,7 +115,13 @@ class InvoiceController extends Controller
      */
     public function edit(Invoice $invoice)
     {
-        //
+        return view('invoices.edit', [
+            'invoice' => $invoice,
+            'clients' => Client::query()->orderBy('company_name')->get(),
+            'quotes' => Quote::query()->orderBy('number')->get(),
+            'users' => User::query()->orderBy('name')->get(),
+            'statuses' => ['draft', 'issued', 'paid', 'overdue', 'cancelled'],
+        ]);
     }
 
     /**
@@ -88,7 +133,25 @@ class InvoiceController extends Controller
      */
     public function update(Request $request, Invoice $invoice)
     {
-        //
+        $validated = $request->validate([
+            'number' => ['required', 'string', 'max:255', Rule::unique('invoices', 'number')->ignore($invoice->id)],
+            'client_id' => ['nullable', 'exists:clients,id'],
+            'quote_id' => ['nullable', 'exists:quotes,id'],
+            'created_by' => ['nullable', 'exists:users,id'],
+            'status' => ['required', Rule::in(['draft', 'issued', 'paid', 'overdue', 'cancelled'])],
+            'sub_total' => ['required', 'numeric', 'min:0'],
+            'tax' => ['required', 'numeric', 'min:0'],
+            'discount' => ['required', 'numeric', 'min:0'],
+            'total' => ['required', 'numeric', 'min:0'],
+            'issued_at' => ['nullable', 'date'],
+            'due_at' => ['nullable', 'date'],
+            'paid_at' => ['nullable', 'date'],
+            'notes' => ['nullable', 'string'],
+        ]);
+
+        $invoice->update($validated);
+
+        return redirect()->route('invoices.list')->with('status', 'Invoice updated successfully.');
     }
 
     /**
@@ -99,6 +162,8 @@ class InvoiceController extends Controller
      */
     public function destroy(Invoice $invoice)
     {
-        //
+        $invoice->delete();
+
+        return redirect()->route('invoices.list')->with('status', 'Invoice deleted successfully.');
     }
 }

@@ -36,13 +36,25 @@ class ClientController extends Controller
     }
 
     /**
+     * Display the full list view used for CRUD operations.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function list()
+    {
+        return view('clients.list', [
+            'clients' => Client::query()->latest()->paginate(15),
+        ]);
+    }
+
+    /**
      * Show the form for creating a new resource.
      *
      * @return \Illuminate\Http\Response
      */
     public function create()
     {
-        //
+        return view('clients.create');
     }
 
     /**
@@ -53,7 +65,22 @@ class ClientController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'company_name' => ['required', 'string', 'max:255'],
+            'contact_name' => ['nullable', 'string', 'max:255'],
+            'email' => ['nullable', 'email', 'max:255'],
+            'phone' => ['nullable', 'string', 'max:255'],
+            'address' => ['nullable', 'string', 'max:255'],
+            'city' => ['nullable', 'string', 'max:255'],
+            'zipcode' => ['nullable', 'string', 'max:50'],
+            'country' => ['nullable', 'string', 'max:255'],
+            'notes' => ['nullable', 'string'],
+        ]);
+
+        $validated['created_by'] = auth()->id();
+        Client::create($validated);
+
+        return redirect()->route('clients.list')->with('status', 'Client created successfully.');
     }
 
     /**
@@ -75,7 +102,7 @@ class ClientController extends Controller
      */
     public function edit(Client $client)
     {
-        //
+        return view('clients.edit', compact('client'));
     }
 
     /**
@@ -87,7 +114,21 @@ class ClientController extends Controller
      */
     public function update(Request $request, Client $client)
     {
-        //
+        $validated = $request->validate([
+            'company_name' => ['required', 'string', 'max:255'],
+            'contact_name' => ['nullable', 'string', 'max:255'],
+            'email' => ['nullable', 'email', 'max:255'],
+            'phone' => ['nullable', 'string', 'max:255'],
+            'address' => ['nullable', 'string', 'max:255'],
+            'city' => ['nullable', 'string', 'max:255'],
+            'zipcode' => ['nullable', 'string', 'max:50'],
+            'country' => ['nullable', 'string', 'max:255'],
+            'notes' => ['nullable', 'string'],
+        ]);
+
+        $client->update($validated);
+
+        return redirect()->route('clients.list')->with('status', 'Client updated successfully.');
     }
 
     /**
@@ -98,6 +139,8 @@ class ClientController extends Controller
      */
     public function destroy(Client $client)
     {
-        //
+        $client->delete();
+
+        return redirect()->route('clients.list')->with('status', 'Client deleted successfully.');
     }
 }
