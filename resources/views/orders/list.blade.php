@@ -32,7 +32,9 @@
                     @forelse ($orders as $order)
                         <tr>
                             <td class="px-4 py-3">{{ $order->number }}</td>
-                            <td class="px-4 py-3">{{ $order->client?->company_name ?: '-' }}</td>
+                            <td class="px-4 py-3">
+                                {{ optional($order->client)->company_name ?? '-' }}
+                            </td>
                             <td class="px-4 py-3">{{ ucfirst($order->status) }}</td>
                             <td class="px-4 py-3">${{ number_format((float) $order->total, 2) }}</td>
                             <td class="px-4 py-3">
