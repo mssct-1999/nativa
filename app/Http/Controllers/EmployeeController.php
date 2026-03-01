@@ -6,6 +6,7 @@ use App\Http\Controllers\Concerns\BuildsMonthlyMetrics;
 use App\Models\Employee;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Validation\Rule;
 
 class EmployeeController extends Controller
@@ -45,9 +46,137 @@ class EmployeeController extends Controller
      */
     public function list()
     {
+        $organizationEmployees = Employee::query()
+            ->with('user')
+            ->orderBy('employee_number')
+            ->orderBy('id')
+            ->get();
+
         return view('employees.list', [
             'employees' => Employee::query()->with(['user', 'employee'])->latest()->paginate(15),
+            'organizationTree' => $this->buildOrganizationTree($organizationEmployees),
         ]);
+    }
+
+    /**
+     * Build a manager-based organization tree for display in the list view.
+     */
+    protected function buildOrganizationTree(Collection $employees): Collection
+    {
+        $employeesById = $employees->keyBy('id');
+        $childrenByManager = $employees->groupBy('manager_id');
+
+        $roots = $employees->filter(function (Employee $employee) use ($employeesById) {
+            if ($employee->manager_id === null || $employee->manager_id === $employee->id) {
+                return true;
+            }
+
+            return ! $employeesById->has($employee->manager_id);
+        })->values();
+
+        $visited = [];
+        $tree = $roots->map(function (Employee $employee) use (&$visited, $childrenByManager) {
+            return $this->buildTreeNode($employee, $childrenByManager, $visited, []);
+        })->values();
+
+        // Include any employees skipped due to cyclic or disconnected manager links.
+        $remaining = $employees->reject(fn (Employee $employee) => isset($visited[$employee->id]))->values();
+
+        $extraRoots = $remaining->map(function (Employee $employee) use (&$visited, $childrenByManager) {
+            return $this->buildTreeNode($employee, $childrenByManager, $visited, []);
+        })->values();
+
+        return $tree->concat($extraRoots)->values();
+    }
+
+    /**
+     * Recursively build one node and its descendants, guarding against cycles.
+     *
+     * @param  array<int, bool>  $visited
+     * @param  array<int, bool>  $path
+     * @return array{employee: Employee, children: Collection<int, array>}
+     */
+    protected function buildTreeNode(Employee $employee, Collection $childrenByManager, array &$visited, array $path): array
+    {
+        if (isset($path[$employee->id])) {
+            return [
+                'employee' => $employee,
+                'children' => collect(),
+            ];
+        }
+
+        $visited[$employee->id] = true;
+        $path[$employee->id] = true;
+
+        $children = $childrenByManager->get($employee->id, collect())
+            ->filter(fn (Employee $child) => ! isset($path[$child->id]))
+            ->sortBy(fn (Employee $child) => [$child->employee_number ?? '', $child->id])
+            ->values()
+            ->map(function (Employee $child) use ($childrenByManager, &$visited, $path) {
+                return $this->buildTreeNode($child, $childrenByManager, $visited, $path);
+            })->values();
+
+        return [
+            'employee' => $employee,
+            'children' => $children,
+        ];
+    }
+
+    /**
+     * Reassign an employee under a manager from the organization tree drag-and-drop UI.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Models\Employee  $employee
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function updateManager(Request $request, Employee $employee)
+    {
+        $validated = $request->validate([
+            'manager_id' => ['nullable', 'integer', 'exists:employees,id', Rule::notIn([$employee->id])],
+        ]);
+
+        $managerId = $validated['manager_id'] ?? null;
+
+        if ($managerId !== null && $this->createsManagerCycle($employee->id, $managerId)) {
+            return response()->json([
+                'message' => 'Invalid manager assignment. This change would create a reporting cycle.',
+            ], 422);
+        }
+
+        $employee->update(['manager_id' => $managerId]);
+
+        return response()->json([
+            'message' => 'Manager assignment updated successfully.',
+        ]);
+    }
+
+    /**
+     * Check whether assigning $proposedManagerId to $employeeId would create a cycle.
+     */
+    protected function createsManagerCycle(int $employeeId, int $proposedManagerId): bool
+    {
+        $visited = [];
+        $current = Employee::query()->select(['id', 'manager_id'])->find($proposedManagerId);
+
+        while ($current !== null) {
+            if (isset($visited[$current->id])) {
+                return true;
+            }
+
+            if ((int) $current->id === $employeeId) {
+                return true;
+            }
+
+            $visited[$current->id] = true;
+
+            if ($current->manager_id === null) {
+                return false;
+            }
+
+            $current = Employee::query()->select(['id', 'manager_id'])->find($current->manager_id);
+        }
+
+        return false;
     }
 
     /**

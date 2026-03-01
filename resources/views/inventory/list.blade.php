@@ -32,9 +32,12 @@
                 <tbody class="divide-y divide-slate-100">
                     @forelse ($inventories as $inventory)
                         <tr>
-                            <td class="px-4 py-3">{{ $inventory->product?->name ?: '-' }}</td>
-                            <td class="px-4 py-3">{{ $inventory->warehouse?->name ?: '-' }}</td>
-                            <td class="px-4 py-3">{{ number_format((float) $inventory->quantity, 2) }}</td>
+<td class="px-4 py-3">
+    {{ optional($inventory->product)->name ?? '-' }}
+</td>
+<td class="px-4 py-3">
+    {{ optional($inventory->warehouse)->name ?? '-' }}
+</td>                            <td class="px-4 py-3">{{ number_format((float) $inventory->quantity, 2) }}</td>
                             <td class="px-4 py-3">{{ number_format((float) $inventory->reserved, 2) }}</td>
                             <td class="px-4 py-3">{{ number_format((float) $inventory->reorder_point, 2) }}</td>
                             <td class="px-4 py-3">

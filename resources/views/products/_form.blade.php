@@ -34,11 +34,11 @@
 
 <div class="mt-4 flex items-center gap-6">
     <label class="inline-flex items-center gap-2 text-sm text-slate-700">
-        <input type="checkbox" name="taxable" value="1" class="rounded border-slate-300" @checked(old('taxable', $product->taxable ?? true)) />
+        <input type="checkbox" name="taxable" value="1" {{ old('taxable', $product->taxable ?? true) ? 'checked' : '' }} />        
         Taxable
     </label>
     <label class="inline-flex items-center gap-2 text-sm text-slate-700">
-        <input type="checkbox" name="active" value="1" class="rounded border-slate-300" @checked(old('active', $product->active ?? true)) />
+    <input type="checkbox" name="active" value="1" {{ old('active', $product->active ?? true) ? 'checked' : '' }} />        
         Active
     </label>
 </div>

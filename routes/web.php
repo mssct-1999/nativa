@@ -7,6 +7,8 @@ use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\EmployeeController;
+use App\Http\Controllers\PayrollController;
+use App\Http\Controllers\WarehouseController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -44,9 +46,19 @@ Route::middleware('auth')->group(function() {
     Route::get('inventory/list', [InventoryController::class, 'list'])->name('inventory.list');
     Route::resource('inventory', InventoryController::class);
 
+    // WAREHOUSES
+    Route::get('warehouses/list', [WarehouseController::class, 'list'])->name('warehouses.list');
+    Route::resource('warehouses', WarehouseController::class);
+
     // EMPLOYEES 
     Route::get('employees/list', [EmployeeController::class, 'list'])->name('employees.list');
+    Route::patch('employees/{employee}/manager', [EmployeeController::class, 'updateManager'])->name('employees.manager.update');
     Route::resource('employees', EmployeeController::class);
+
+    // PAYROLLS
+    Route::get('payrolls/list', [PayrollController::class, 'list'])->name('payrolls.list');
+    Route::get('payrolls/export/pdf', [PayrollController::class, 'exportPdf'])->name('payrolls.export.pdf');
+    Route::resource('payrolls', PayrollController::class);
 });
 
 require __DIR__.'/auth.php';

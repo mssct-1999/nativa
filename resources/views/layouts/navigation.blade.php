@@ -7,6 +7,8 @@
         ['label' => 'Invoices', 'route' => 'invoices.index', 'active' => 'invoices.*'],
         ['label' => 'Inventory', 'route' => 'inventory.index', 'active' => 'inventory.*'],
         ['label' => 'Employees', 'route' => 'employees.index', 'active' => 'employees.*'],
+        ['label' => 'Payrolls', 'route' => 'payrolls.index', 'active' => 'payrolls.*'],
+        ['label' => 'Warehouses', 'route' => 'warehouses.index', 'active' => 'warehouses.*'],
     ];
 @endphp
 

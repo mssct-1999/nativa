@@ -7,6 +7,7 @@ use App\Models\Client;
 use App\Models\Employee;
 use App\Models\Invoice;
 use App\Models\Order;
+use App\Models\Payment;
 use App\Models\Product;
 
 class DashboardController extends Controller
@@ -21,6 +22,12 @@ class DashboardController extends Controller
     public function index()
     {
         $chart = $this->monthlyCountSeries(Order::class);
+        $latestPayments = Payment::query()
+            ->with(['invoice'])
+            ->orderByDesc('paid_at')
+            ->orderByDesc('created_at')
+            ->limit(5)
+            ->get();
 
         return view('dashboard', [
             'pageDescription' => 'Business activity at a glance across your main operations.',
@@ -37,6 +44,7 @@ class DashboardController extends Controller
                 'labels' => $chart['labels'],
                 'values' => $chart['values'],
             ],
+            'latestPayments' => $latestPayments,
         ]);
     }
 }
