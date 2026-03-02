@@ -46,9 +46,53 @@ class OrderController extends Controller
      */
     public function list()
     {
+        $timelineOrders = Order::query()
+            ->with(['client', 'user'])
+            ->orderByRaw('COALESCE(ordered_at, created_at) DESC')
+            ->orderByDesc('id')
+            ->limit(150)
+            ->get();
+
+        $timeline = $timelineOrders
+            ->groupBy(function (Order $order) {
+                return optional($order->ordered_at ?? $order->created_at)->format('Y-m-d');
+            })
+            ->map(function ($orders, $day) {
+                return [
+                    'day' => $day,
+                    'day_total' => (float) $orders->sum('total'),
+                    'orders' => $orders,
+                ];
+            })
+            ->values();
+
         return view('orders.list', [
             'orders' => Order::query()->with(['client', 'user'])->latest()->paginate(15),
+            'timeline' => $timeline,
         ]);
+    }
+
+    /**
+     * Quickly mark an order as shipped from the timeline view.
+     *
+     * @param  \App\Models\Order  $order
+     * @return \Illuminate\Http\Response
+     */
+    public function markShipped(Order $order)
+    {
+        if ($order->shipped_at !== null) {
+            return redirect()->route('orders.list')->with('status', 'Order is already marked as shipped.');
+        }
+
+        $order->shipped_at = now();
+
+        if (in_array($order->status, ['pending', 'processing'], true)) {
+            $order->status = 'completed';
+        }
+
+        $order->save();
+
+        return redirect()->route('orders.list')->with('status', 'Order marked as shipped.');
     }
 
     /**

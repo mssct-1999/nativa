@@ -43,5 +43,44 @@
                 </table>
             </div>
         </div>
+
+        <div class="mt-6 rounded-xl border border-amber-200 bg-amber-50 p-5 shadow-sm">
+            <div class="flex items-center justify-between">
+                <h3 class="text-sm font-semibold text-amber-900">Products To Refill</h3>
+                <span class="text-xs text-amber-700">Quantity at or below reorder point</span>
+            </div>
+
+            <div class="mt-4 overflow-x-auto rounded-lg bg-white">
+                <table class="min-w-full text-sm">
+                    <thead class="bg-amber-100 text-amber-900">
+                        <tr>
+                            <th class="px-4 py-3 text-left">Product</th>
+                            <th class="px-4 py-3 text-left">Warehouse</th>
+                            <th class="px-4 py-3 text-left">Current qty</th>
+                            <th class="px-4 py-3 text-left">Reorder point</th>
+                            <th class="px-4 py-3 text-left">Shortage</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-amber-100">
+                        @forelse ($lowStockItems as $item)
+                            @php
+                                $shortage = max(0, (float) $item->reorder_point - (float) $item->quantity);
+                            @endphp
+                            <tr>
+                                <td class="px-4 py-3">{{ optional($item->product)->name ?? '-' }}</td>
+                                <td class="px-4 py-3">{{ optional($item->warehouse)->name ?? '-' }}</td>
+                                <td class="px-4 py-3">{{ number_format((float) $item->quantity, 2) }}</td>
+                                <td class="px-4 py-3">{{ number_format((float) $item->reorder_point, 2) }}</td>
+                                <td class="px-4 py-3 font-semibold text-amber-900">{{ number_format($shortage, 2) }}</td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="5" class="px-4 py-6 text-center text-slate-500">No refill needed right now.</td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 </x-app-layout>

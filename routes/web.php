@@ -36,6 +36,7 @@ Route::middleware('auth')->group(function() {
 
     // ORDERS 
     Route::get('orders/list', [OrderController::class, 'list'])->name('orders.list');
+    Route::patch('orders/{order}/mark-shipped', [OrderController::class, 'markShipped'])->name('orders.mark-shipped');
     Route::resource('orders', OrderController::class);
 
     // INVOICES 

@@ -16,8 +16,7 @@
     <div class="sticky top-0 flex h-screen flex-col">
         <div class="px-5 py-6 border-b border-slate-200">
             <a href="{{ route('dashboard') }}" class="flex items-center">
-                <x-application-logo class="block h-10 w-auto fill-current text-emerald-600" />
-                <span class="ml-3 text-lg font-bold tracking-tight text-slate-900">Nativa</span>
+                <x-application-logo class="block h-20 w-auto fill-current text-emerald-600" />
             </a>
             <p class="mt-2 text-xs font-medium uppercase tracking-wide text-slate-400">Operations Center</p>
         </div>

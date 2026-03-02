@@ -32,7 +32,9 @@
                     @forelse ($invoices as $invoice)
                         <tr>
                             <td class="px-4 py-3">{{ $invoice->number }}</td>
-                            <td class="px-4 py-3">{{ $invoice->client?->company_name ?: '-' }}</td>
+                            <td class="px-4 py-3">
+                                {{ optional($invoice->client)->company_name ?? '-' }}
+                            </td>                            
                             <td class="px-4 py-3">{{ ucfirst($invoice->status) }}</td>
                             <td class="px-4 py-3">${{ number_format((float) $invoice->total, 2) }}</td>
                             <td class="px-4 py-3">

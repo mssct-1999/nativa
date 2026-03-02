@@ -9,7 +9,7 @@
                 @php
                     $name = optional($employeeOption->user)->name ?? ($employeeOption->employee_number ?: 'Employee #'.$employeeOption->id);
                 @endphp
-                <option value="{{ $employeeOption->id }}" @selected((string) old('employee_id', $payroll->employee_id ?? '') === (string) $employeeOption->id)>
+                <option value="{{ $employeeOption->id }}" {{ (string) old('employee_id', $payroll->employee_id ?? '') === (string) $employeeOption->id ? 'selected' : '' }}>
                     {{ $name }} ({{ $employeeOption->employee_number ?: 'No #' }})
                 </option>
             @endforeach
@@ -21,7 +21,7 @@
         <label for="status" class="block text-sm font-medium text-slate-700">Status</label>
         <select id="status" name="status" required class="mt-1 w-full rounded-md border-slate-300">
             @foreach ($statuses as $status)
-                <option value="{{ $status }}" @selected(old('status', $payroll->status ?? 'pending') === $status)>{{ ucfirst($status) }}</option>
+                <option value="{{ $status }}" {{ old('status', $payroll->status ?? 'pending') === $status ? 'selected' : '' }}>{{ ucfirst($status) }}</option>
             @endforeach
         </select>
         @error('status') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror

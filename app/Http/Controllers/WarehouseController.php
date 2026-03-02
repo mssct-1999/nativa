@@ -55,18 +55,19 @@ class WarehouseController extends Controller
                 ->sortByDesc('quantity')
                 ->values();
 
-            $topProducts = $inventories->take(8);
-            $maxQuantity = max(1, (float) $topProducts->max('quantity'));
+            $maxQuantity = max(1, (float) $inventories->max('quantity'));
 
             $warehouseCharts[$warehouse->id] = [
                 'total_quantity' => (float) $inventories->sum('quantity'),
-                'top_products' => $topProducts->map(function ($inventory) use ($maxQuantity) {
+                'product_count' => $inventories->count(),
+                'max_quantity' => $maxQuantity,
+                'products' => $inventories->map(function ($inventory) use ($maxQuantity) {
                     $quantity = (float) $inventory->quantity;
 
                     return [
                         'name' => optional($inventory->product)->name ?? ('Product #'.$inventory->product_id),
                         'quantity' => $quantity,
-                        'percent' => min(100, max(4, (int) round(($quantity / $maxQuantity) * 100))),
+                        'percent' => $maxQuantity > 0 ? ($quantity / $maxQuantity) * 100 : 0,
                     ];
                 })->values(),
             ];

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Concerns\BuildsMonthlyMetrics;
 use App\Models\Client;
 use App\Models\Employee;
+use App\Models\Inventory;
 use App\Models\Invoice;
 use App\Models\Order;
 use App\Models\Payment;
@@ -28,6 +29,12 @@ class DashboardController extends Controller
             ->orderByDesc('created_at')
             ->limit(5)
             ->get();
+        $lowStockItems = Inventory::query()
+            ->with(['product', 'warehouse'])
+            ->whereColumn('quantity', '<=', 'reorder_point')
+            ->orderByRaw('(reorder_point - quantity) DESC')
+            ->limit(10)
+            ->get();
 
         return view('dashboard', [
             'pageDescription' => 'Business activity at a glance across your main operations.',
@@ -45,6 +52,7 @@ class DashboardController extends Controller
                 'values' => $chart['values'],
             ],
             'latestPayments' => $latestPayments,
+            'lowStockItems' => $lowStockItems,
         ]);
     }
 }
