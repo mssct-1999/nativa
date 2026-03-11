@@ -6,6 +6,8 @@ use App\Http\Controllers\ClientController;
 use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\PosController;
+use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\PayrollController;
 use App\Http\Controllers\WarehouseController;
@@ -60,6 +62,25 @@ Route::middleware('auth')->group(function() {
     Route::get('payrolls/list', [PayrollController::class, 'list'])->name('payrolls.list');
     Route::get('payrolls/export/pdf', [PayrollController::class, 'exportPdf'])->name('payrolls.export.pdf');
     Route::resource('payrolls', PayrollController::class);
+
+    // POS + TRANSACTIONS
+    Route::get('pos', [PosController::class, 'index'])->name('pos.index');
+    Route::post('pos/lookup', [PosController::class, 'lookup'])->name('pos.lookup');
+    Route::post('pos/checkout', [PosController::class, 'checkout'])->name('pos.checkout');
+
+    Route::get('transactions', [TransactionController::class, 'index'])->name('transactions.list');
+
+    // SETTINGS
+    Route::post('settings/locale', function (\Illuminate\Http\Request $request) {
+        $locale = $request->input('locale');
+        $supported = ['en', 'fr', 'pt'];
+
+        if (is_string($locale) && in_array($locale, $supported, true)) {
+            $request->session()->put('locale', $locale);
+        }
+
+        return redirect()->back();
+    })->name('settings.locale');
 });
 
 require __DIR__.'/auth.php';

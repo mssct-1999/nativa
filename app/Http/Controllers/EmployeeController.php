@@ -44,17 +44,36 @@ class EmployeeController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function list()
+    public function list(Request $request)
     {
+        $search = trim((string) $request->query('q', ''));
+
         $organizationEmployees = Employee::query()
             ->with('user')
             ->orderBy('employee_number')
             ->orderBy('id')
             ->get();
 
+        $query = Employee::query()->with(['user', 'employee']);
+
+        if ($search !== '') {
+            $query->where(function ($builder) use ($search) {
+                $builder
+                    ->where('employee_number', 'like', '%'.$search.'%')
+                    ->orWhere('position', 'like', '%'.$search.'%')
+                    ->orWhere('department', 'like', '%'.$search.'%')
+                    ->orWhere('status', 'like', '%'.$search.'%')
+                    ->orWhereHas('user', function ($userQuery) use ($search) {
+                        $userQuery->where('name', 'like', '%'.$search.'%')
+                            ->orWhere('email', 'like', '%'.$search.'%');
+                    });
+            });
+        }
+
         return view('employees.list', [
-            'employees' => Employee::query()->with(['user', 'employee'])->latest()->paginate(15),
+            'employees' => $query->latest()->paginate(15)->withQueryString(),
             'organizationTree' => $this->buildOrganizationTree($organizationEmployees),
+            'search' => $search,
         ]);
     }
 

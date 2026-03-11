@@ -12,9 +12,28 @@ class TransactionController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        //
+        $search = trim((string) $request->query('q', ''));
+
+        $query = Transaction::query()->with('account');
+
+        if ($search !== '') {
+            $query->where(function ($builder) use ($search) {
+                $builder
+                    ->where('description', 'like', '%'.$search.'%')
+                    ->orWhere('reference_type', 'like', '%'.$search.'%')
+                    ->orWhere('reference_id', 'like', '%'.$search.'%')
+                    ->orWhereHas('account', function ($accountQuery) use ($search) {
+                        $accountQuery->where('name', 'like', '%'.$search.'%');
+                    });
+            });
+        }
+
+        return view('transactions.list', [
+            'transactions' => $query->latest()->paginate(20)->withQueryString(),
+            'search' => $search,
+        ]);
     }
 
     /**

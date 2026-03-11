@@ -5,7 +5,7 @@
                 {{ __('Employees List') }}
             </h2>
             <a href="{{ route('employees.create') }}" class="inline-flex items-center rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-500">
-                Add new employee
+                {{ __('Add new employee') }}
             </a>
         </div>
     </x-slot>
@@ -17,19 +17,35 @@
             </div>
         @endif
 
+        <form method="GET" action="{{ route('employees.list') }}" class="flex flex-wrap items-center gap-3">
+            <input
+                type="text"
+                name="q"
+                value="{{ $search ?? '' }}"
+                placeholder="{{ __('Search employees, department, status...') }}"
+                class="w-full max-w-md rounded-md border-slate-300 text-sm"
+            />
+            <button type="submit" class="inline-flex items-center rounded-md bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-700">
+                {{ __('Search') }}
+            </button>
+            @if (!empty($search))
+                <a href="{{ route('employees.list') }}" class="text-sm text-slate-600 hover:text-slate-900">{{ __('Clear') }}</a>
+            @endif
+        </form>
+
         <div
             class="rounded-xl border border-slate-200 bg-slate-50 p-4 shadow-sm"
             data-manager-update-url-template="{{ route('employees.manager.update', ['employee' => '__EMPLOYEE__']) }}"
         >
-            <h3 class="text-base font-semibold text-slate-900">Organization Structure</h3>
-            <p class="mt-1 text-sm text-slate-600">Drag an employee card and drop it on another employee to assign a new manager.</p>
+            <h3 class="text-base font-semibold text-slate-900">{{ __('Organization Structure') }}</h3>
+            <p class="mt-1 text-sm text-slate-600">{{ __('Drag an employee card and drop it on another employee to assign a new manager.') }}</p>
             <div
                 class="org-top-drop mt-3 rounded-lg border border-dashed border-slate-300 bg-white px-3 py-2 text-xs text-slate-600 transition"
                 data-org-drop-target="1"
                 data-manager-id=""
-                data-manager-name="No manager (top level)"
+                data-manager-name="{{ __('No manager (top level)') }}"
             >
-                Drop here to move employee to top level (no manager).
+                {{ __('Drop here to move employee to top level (no manager).') }}
             </div>
 
             @if ($organizationTree->isNotEmpty())
@@ -39,7 +55,7 @@
                     @endforeach
                 </ul>
             @else
-                <p class="mt-3 text-sm text-slate-500">No employees found to build the organization structure.</p>
+                <p class="mt-3 text-sm text-slate-500">{{ __('No employees found to build the organization structure.') }}</p>
             @endif
         </div>
 
@@ -47,12 +63,12 @@
             <table class="min-w-full text-sm">
                 <thead class="bg-slate-50 text-slate-600">
                     <tr>
-                        <th class="px-4 py-3 text-left">Employee #</th>
-                        <th class="px-4 py-3 text-left">User</th>
-                        <th class="px-4 py-3 text-left">Position</th>
-                        <th class="px-4 py-3 text-left">Department</th>
-                        <th class="px-4 py-3 text-left">Status</th>
-                        <th class="px-4 py-3 text-left">Actions</th>
+                        <th class="px-4 py-3 text-left">{{ __('Employee #') }}</th>
+                        <th class="px-4 py-3 text-left">{{ __('User') }}</th>
+                        <th class="px-4 py-3 text-left">{{ __('Position') }}</th>
+                        <th class="px-4 py-3 text-left">{{ __('Department') }}</th>
+                        <th class="px-4 py-3 text-left">{{ __('Status') }}</th>
+                        <th class="px-4 py-3 text-left">{{ __('Actions') }}</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100">
@@ -67,18 +83,18 @@
                             <td class="px-4 py-3">{{ ucfirst($employee->status) }}</td>
                             <td class="px-4 py-3">
                                 <div class="flex items-center gap-3">
-                                    <a href="{{ route('employees.edit', $employee) }}" class="text-amber-600 hover:text-amber-700 font-medium">Edit</a>
-                                    <form method="POST" action="{{ route('employees.destroy', $employee) }}" onsubmit="return confirm('Delete this employee?');">
+                                    <a href="{{ route('employees.edit', $employee) }}" class="text-amber-600 hover:text-amber-700 font-medium">{{ __('Edit') }}</a>
+                                    <form method="POST" action="{{ route('employees.destroy', $employee) }}" onsubmit="return confirm('{{ __('Delete this employee?') }}');">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="text-red-600 hover:text-red-700 font-medium">Delete</button>
+                                        <button type="submit" class="text-red-600 hover:text-red-700 font-medium">{{ __('Delete') }}</button>
                                     </form>
                                 </div>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="px-4 py-6 text-center text-slate-500">No employees found.</td>
+                            <td colspan="6" class="px-4 py-6 text-center text-slate-500">{{ __('No employees found.') }}</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -86,7 +102,7 @@
         </div>
 
         <div>
-            {{ $employees->links() }}
+            {{ $employees->withQueryString()->links() }}
         </div>
     </div>
 

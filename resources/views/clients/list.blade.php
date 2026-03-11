@@ -5,7 +5,7 @@
                 {{ __('Clients List') }}
             </h2>
             <a href="{{ route('clients.create') }}" class="inline-flex items-center rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-500">
-                Add new client
+                {{ __('Add new client') }}
             </a>
         </div>
     </x-slot>
@@ -17,15 +17,31 @@
             </div>
         @endif
 
+        <form method="GET" action="{{ route('clients.list') }}" class="flex flex-wrap items-center gap-3">
+            <input
+                type="text"
+                name="q"
+                value="{{ $search ?? '' }}"
+                placeholder="{{ __('Search clients, email, phone...') }}"
+                class="w-full max-w-md rounded-md border-slate-300 text-sm"
+            />
+            <button type="submit" class="inline-flex items-center rounded-md bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-700">
+                {{ __('Search') }}
+            </button>
+            @if (!empty($search))
+                <a href="{{ route('clients.list') }}" class="text-sm text-slate-600 hover:text-slate-900">{{ __('Clear') }}</a>
+            @endif
+        </form>
+
         <div class="rounded-xl border border-slate-200 bg-white shadow-sm overflow-x-auto">
             <table class="min-w-full text-sm">
                 <thead class="bg-slate-50 text-slate-600">
                     <tr>
-                        <th class="px-4 py-3 text-left">Company</th>
-                        <th class="px-4 py-3 text-left">Contact</th>
-                        <th class="px-4 py-3 text-left">Email</th>
-                        <th class="px-4 py-3 text-left">Phone</th>
-                        <th class="px-4 py-3 text-left">Actions</th>
+                        <th class="px-4 py-3 text-left">{{ __('Company') }}</th>
+                        <th class="px-4 py-3 text-left">{{ __('Contact') }}</th>
+                        <th class="px-4 py-3 text-left">{{ __('Email') }}</th>
+                        <th class="px-4 py-3 text-left">{{ __('Phone') }}</th>
+                        <th class="px-4 py-3 text-left">{{ __('Actions') }}</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100">
@@ -37,18 +53,18 @@
                             <td class="px-4 py-3">{{ $client->phone ?: '-' }}</td>
                             <td class="px-4 py-3">
                                 <div class="flex items-center gap-3">
-                                    <a href="{{ route('clients.edit', $client) }}" class="text-amber-600 hover:text-amber-700 font-medium">Edit</a>
-                                    <form method="POST" action="{{ route('clients.destroy', $client) }}" onsubmit="return confirm('Delete this client?');">
+                                    <a href="{{ route('clients.edit', $client) }}" class="text-amber-600 hover:text-amber-700 font-medium">{{ __('Edit') }}</a>
+                                    <form method="POST" action="{{ route('clients.destroy', $client) }}" onsubmit="return confirm('{{ __('Delete this client?') }}');">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="text-red-600 hover:text-red-700 font-medium">Delete</button>
+                                        <button type="submit" class="text-red-600 hover:text-red-700 font-medium">{{ __('Delete') }}</button>
                                     </form>
                                 </div>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="px-4 py-6 text-center text-slate-500">No clients found.</td>
+                            <td colspan="5" class="px-4 py-6 text-center text-slate-500">{{ __('No clients found.') }}</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -56,7 +72,7 @@
         </div>
 
         <div>
-            {{ $clients->links() }}
+            {{ $clients->withQueryString()->links() }}
         </div>
     </div>
 </x-app-layout>

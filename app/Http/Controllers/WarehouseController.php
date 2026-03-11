@@ -41,12 +41,27 @@ class WarehouseController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function list()
+    public function list(Request $request)
     {
-        $warehouses = Warehouse::query()
+        $search = trim((string) $request->query('q', ''));
+
+        $query = Warehouse::query();
+
+        if ($search !== '') {
+            $query->where(function ($builder) use ($search) {
+                $builder
+                    ->where('name', 'like', '%'.$search.'%')
+                    ->orWhere('code', 'like', '%'.$search.'%')
+                    ->orWhere('location', 'like', '%'.$search.'%')
+                    ->orWhere('contact', 'like', '%'.$search.'%');
+            });
+        }
+
+        $warehouses = $query
             ->with(['inventories.product'])
             ->latest()
-            ->paginate(15);
+            ->paginate(15)
+            ->withQueryString();
 
         $warehouseCharts = [];
 
@@ -76,6 +91,7 @@ class WarehouseController extends Controller
         return view('warehouses.list', [
             'warehouses' => $warehouses,
             'warehouseCharts' => $warehouseCharts,
+            'search' => $search,
         ]);
     }
 

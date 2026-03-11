@@ -44,10 +44,27 @@ class OrderController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function list()
+    public function list(Request $request)
     {
-        $timelineOrders = Order::query()
-            ->with(['client', 'user'])
+        $search = trim((string) $request->query('q', ''));
+
+        $baseQuery = Order::query()->with(['client', 'user']);
+
+        if ($search !== '') {
+            $baseQuery->where(function ($builder) use ($search) {
+                $builder
+                    ->where('number', 'like', '%'.$search.'%')
+                    ->orWhere('status', 'like', '%'.$search.'%')
+                    ->orWhereHas('client', function ($clientQuery) use ($search) {
+                        $clientQuery->where('company_name', 'like', '%'.$search.'%');
+                    })
+                    ->orWhereHas('user', function ($userQuery) use ($search) {
+                        $userQuery->where('name', 'like', '%'.$search.'%');
+                    });
+            });
+        }
+
+        $timelineOrders = (clone $baseQuery)
             ->orderByRaw('COALESCE(ordered_at, created_at) DESC')
             ->orderByDesc('id')
             ->limit(150)
@@ -67,8 +84,9 @@ class OrderController extends Controller
             ->values();
 
         return view('orders.list', [
-            'orders' => Order::query()->with(['client', 'user'])->latest()->paginate(15),
+            'orders' => (clone $baseQuery)->latest()->paginate(15)->withQueryString(),
             'timeline' => $timeline,
+            'search' => $search,
         ]);
     }
 

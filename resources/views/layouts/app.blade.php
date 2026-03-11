@@ -13,6 +13,7 @@
         <!-- Scripts -->
         <link rel="stylesheet" href="{{ asset('css/app.css') }}">
         <script defer src="{{ asset('js/app.js') }}"></script>
+        <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
     </head>
     <body class="font-sans antialiased bg-slate-100 text-slate-900">
         <div class="min-h-screen lg:flex">

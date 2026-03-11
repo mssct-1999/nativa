@@ -5,7 +5,7 @@
                 {{ __('Warehouses List') }}
             </h2>
             <a href="{{ route('warehouses.create') }}" class="inline-flex items-center rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-500">
-                Add new warehouse
+                {{ __('Add new warehouse') }}
             </a>
         </div>
     </x-slot>
@@ -16,6 +16,22 @@
                 {{ session('status') }}
             </div>
         @endif
+
+        <form method="GET" action="{{ route('warehouses.list') }}" class="flex flex-wrap items-center gap-3">
+            <input
+                type="text"
+                name="q"
+                value="{{ $search ?? '' }}"
+                placeholder="{{ __('Search warehouse, code, location...') }}"
+                class="w-full max-w-md rounded-md border-slate-300 text-sm"
+            />
+            <button type="submit" class="inline-flex items-center rounded-md bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-700">
+                {{ __('Search') }}
+            </button>
+            @if (!empty($search))
+                <a href="{{ route('warehouses.list') }}" class="text-sm text-slate-600 hover:text-slate-900">{{ __('Clear') }}</a>
+            @endif
+        </form>
 
         @forelse ($warehouses as $warehouse)
             @php
@@ -38,23 +54,23 @@
                     </div>
 
                     <div class="flex items-center gap-3 text-sm">
-                        <a href="{{ route('warehouses.edit', $warehouse) }}" class="text-amber-600 hover:text-amber-700 font-medium">Edit</a>
-                        <form method="POST" action="{{ route('warehouses.destroy', $warehouse) }}" onsubmit="return confirm('Delete this warehouse?');">
+                        <a href="{{ route('warehouses.edit', $warehouse) }}" class="text-amber-600 hover:text-amber-700 font-medium">{{ __('Edit') }}</a>
+                        <form method="POST" action="{{ route('warehouses.destroy', $warehouse) }}" onsubmit="return confirm('{{ __('Delete this warehouse?') }}');">
                             @csrf
                             @method('DELETE')
-                            <button type="submit" class="text-red-600 hover:text-red-700 font-medium">Delete</button>
+                            <button type="submit" class="text-red-600 hover:text-red-700 font-medium">{{ __('Delete') }}</button>
                         </form>
                     </div>
                 </div>
 
                 <div class="mt-3 flex flex-wrap gap-x-5 gap-y-2 text-xs text-slate-600">
-                    <p>Total quantity: <span class="font-semibold text-slate-900">{{ number_format((float) ($chart['total_quantity'] ?? 0), 2) }}</span></p>
-                    <p>Products: <span class="font-semibold text-slate-900">{{ number_format((int) ($chart['product_count'] ?? 0)) }}</span></p>
-                    <p>Highest qty item: <span class="font-semibold text-slate-900">{{ number_format((float) ($chart['max_quantity'] ?? 0), 2) }}</span></p>
+                    <p>{{ __('Total quantity') }}: <span class="font-semibold text-slate-900">{{ number_format((float) ($chart['total_quantity'] ?? 0), 2) }}</span></p>
+                    <p>{{ __('Products') }}: <span class="font-semibold text-slate-900">{{ number_format((int) ($chart['product_count'] ?? 0)) }}</span></p>
+                    <p>{{ __('Highest qty item') }}: <span class="font-semibold text-slate-900">{{ number_format((float) ($chart['max_quantity'] ?? 0), 2) }}</span></p>
                 </div>
 
                 @if ($products->isEmpty())
-                    <p class="mt-4 text-sm text-slate-500">No inventory registered for this warehouse.</p>
+                    <p class="mt-4 text-sm text-slate-500">{{ __('No inventory registered for this warehouse.') }}</p>
                 @else
                     <div class="mt-4 overflow-x-auto pb-2">
                         <div class="h-64 min-w-full border border-slate-100 rounded-lg bg-slate-50 p-3">
@@ -84,12 +100,12 @@
             </section>
         @empty
             <div class="rounded-xl border border-slate-200 bg-white px-4 py-6 text-center text-slate-500 shadow-sm">
-                No warehouses found.
+                {{ __('No warehouses found.') }}
             </div>
         @endforelse
 
         <div>
-            {{ $warehouses->links() }}
+            {{ $warehouses->withQueryString()->links() }}
         </div>
     </div>
 </x-app-layout>

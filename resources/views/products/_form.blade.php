@@ -7,6 +7,39 @@
         @error('sku') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
     </div>
 
+    <div class="md:col-span-2">
+        <label class="block text-sm font-medium text-slate-700">Barcode</label>
+        @if (isset($product) && $product->barcode)
+            <input type="text" value="{{ $product->barcode }}" class="mt-1 w-full rounded-md border-slate-300 bg-slate-50 text-slate-700" readonly />
+            @if(strlen($product->barcode) == 13 && ctype_digit($product->barcode))
+                <div class="mt-3 p-3 bg-slate-50 rounded-md border border-slate-200">
+                    <p class="text-xs text-slate-600 mb-2">Barcode Preview:</p>
+                    <svg id="barcode-preview" style="max-width: 300px;"></svg>
+                    <script>
+                        try {
+                            JsBarcode("#barcode-preview", "{{ $product->barcode }}", {
+                                format: "EAN13",
+                                width: 2,
+                                height: 50,
+                                displayValue: true,
+                                valid: function() { return true; }
+                            });
+                        } catch (error) {
+                            console.error("Barcode rendering error:", error);
+                            document.getElementById("barcode-preview").innerHTML = '<text x="0" y="25" font-size="14" fill="red">Error rendering barcode</text>';
+                        }
+                    </script>
+                </div>
+            @else
+                <div class="mt-3 p-3 bg-red-50 rounded-md border border-red-200">
+                    <p class="text-xs text-red-600"><strong>Invalid barcode format:</strong> Must be exactly 13 digits.</p>
+                </div>
+            @endif
+        @else
+            <div class="mt-2 text-sm text-slate-500">Barcode will be generated automatically.</div>
+        @endif
+    </div>
+
     <div>
         <label for="name" class="block text-sm font-medium text-slate-700">Name</label>
         <input id="name" name="name" type="text" required value="{{ old('name', $product->name ?? '') }}" class="mt-1 w-full rounded-md border-slate-300" />

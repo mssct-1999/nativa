@@ -44,10 +44,31 @@ class InventoryController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function list()
+    public function list(Request $request)
     {
+        $search = trim((string) $request->query('q', ''));
+
+        $query = Inventory::query()->with(['product', 'warehouse']);
+
+        if ($search !== '') {
+            $query->where(function ($builder) use ($search) {
+                $builder
+                    ->whereHas('product', function ($productQuery) use ($search) {
+                        $productQuery->where('name', 'like', '%'.$search.'%')
+                            ->orWhere('sku', 'like', '%'.$search.'%')
+                            ->orWhere('barcode', 'like', '%'.$search.'%');
+                    })
+                    ->orWhereHas('warehouse', function ($warehouseQuery) use ($search) {
+                        $warehouseQuery->where('name', 'like', '%'.$search.'%')
+                            ->orWhere('code', 'like', '%'.$search.'%')
+                            ->orWhere('location', 'like', '%'.$search.'%');
+                    });
+            });
+        }
+
         return view('inventory.list', [
-            'inventories' => Inventory::query()->with(['product', 'warehouse'])->latest()->paginate(15),
+            'inventories' => $query->latest()->paginate(15)->withQueryString(),
+            'search' => $search,
         ]);
     }
 

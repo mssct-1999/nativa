@@ -9,6 +9,7 @@ namespace App\Models;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Class Product
@@ -38,6 +39,32 @@ class Product extends Model
 {
 	protected $table = 'products';
 
+	protected static function booted()
+	{
+		static::creating(function (self $product) {
+			if (empty($product->barcode)) {
+				$product->barcode = self::generateBarcode();
+			}
+		});
+	}
+
+	public static function generateBarcode(): string
+	{
+		do {
+			// Generate 12 digits: '2' + 11 random digits
+			$barcode = '2'.str_pad((string) random_int(0, 99999999999), 11, '0', STR_PAD_LEFT);
+			// Calculate EAN-13 checksum for the 12 digits
+			$sum = 0;
+			for ($i = 0; $i < 12; $i++) {
+				$sum += (int)$barcode[$i] * ($i % 2 === 0 ? 1 : 3);
+			}
+			$checksum = (10 - ($sum % 10)) % 10;
+			$barcode .= $checksum;
+		} while (DB::table('products')->where('barcode', $barcode)->exists());
+
+		return $barcode;
+	}
+
 	protected $casts = [
 		'price' => 'float',
 		'cost' => 'float',
@@ -47,6 +74,7 @@ class Product extends Model
 
 	protected $fillable = [
 		'sku',
+		'barcode',
 		'name',
 		'description',
 		'price',

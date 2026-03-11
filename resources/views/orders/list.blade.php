@@ -5,7 +5,7 @@
                 {{ __('Orders List') }}
             </h2>
             <a href="{{ route('orders.create') }}" class="inline-flex items-center rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-500">
-                Add new order
+                {{ __('Add new order') }}
             </a>
         </div>
     </x-slot>
@@ -17,9 +17,25 @@
             </div>
         @endif
 
+        <form method="GET" action="{{ route('orders.list') }}" class="flex flex-wrap items-center gap-3">
+            <input
+                type="text"
+                name="q"
+                value="{{ $search ?? '' }}"
+                placeholder="{{ __('Search order number, client, status...') }}"
+                class="w-full max-w-md rounded-md border-slate-300 text-sm"
+            />
+            <button type="submit" class="inline-flex items-center rounded-md bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-700">
+                {{ __('Search') }}
+            </button>
+            @if (!empty($search))
+                <a href="{{ route('orders.list') }}" class="text-sm text-slate-600 hover:text-slate-900">{{ __('Clear') }}</a>
+            @endif
+        </form>
+
         <div class="rounded-xl border border-slate-200 bg-slate-50 p-4 shadow-sm">
-            <h3 class="text-base font-semibold text-slate-900">Orders Timeline History</h3>
-            <p class="mt-1 text-sm text-slate-600">Grouped by day with daily totals, like an account statement.</p>
+            <h3 class="text-base font-semibold text-slate-900">{{ __('Orders Timeline History') }}</h3>
+            <p class="mt-1 text-sm text-slate-600">{{ __('Grouped by day with daily totals, like an account statement.') }}</p>
 
             @if (collect($timeline)->isNotEmpty())
                 <div class="mt-4 space-y-4">
@@ -28,7 +44,7 @@
                             <div class="flex items-center justify-between gap-3 border-b border-slate-100 pb-2">
                                 <h4 class="text-sm font-semibold text-slate-900">{{ $dayGroup['day'] }}</h4>
                                 <p class="text-sm font-semibold text-emerald-700">
-                                    Day total: ${{ number_format((float) $dayGroup['day_total'], 2) }}
+                                    {{ __('Day total') }}: ${{ number_format((float) $dayGroup['day_total'], 2) }}
                                 </p>
                             </div>
 
@@ -39,27 +55,27 @@
                                             <div>
                                                 <p class="text-sm font-semibold text-slate-900">{{ $timelineOrder->number }}</p>
                                                 <p class="text-xs text-slate-600">
-                                                    Client: {{ optional($timelineOrder->client)->company_name ?? '-' }}
+                                                    {{ __('Client') }}: {{ optional($timelineOrder->client)->company_name ?? '-' }}
                                                     <span class="mx-1 text-slate-300">|</span>
-                                                    Created by: {{ optional($timelineOrder->user)->name ?? '-' }}
+                                                    {{ __('Created by') }}: {{ optional($timelineOrder->user)->name ?? '-' }}
                                                     <span class="mx-1 text-slate-300">|</span>
-                                                    Status: {{ ucfirst($timelineOrder->status) }}
+                                                    {{ __('Status') }}: {{ ucfirst($timelineOrder->status) }}
                                                     <span class="mx-1 text-slate-300">|</span>
-                                                    Ordered: {{ optional($timelineOrder->ordered_at)->format('Y-m-d') ?: optional($timelineOrder->created_at)->format('Y-m-d') }}
+                                                    {{ __('Ordered') }}: {{ optional($timelineOrder->ordered_at)->format('Y-m-d') ?: optional($timelineOrder->created_at)->format('Y-m-d') }}
                                                     <span class="mx-1 text-slate-300">|</span>
-                                                    Shipped: {{ optional($timelineOrder->shipped_at)->format('Y-m-d') ?: 'Not shipped' }}
+                                                    {{ __('Shipped') }}: {{ optional($timelineOrder->shipped_at)->format('Y-m-d') ?: __('Not shipped') }}
                                                 </p>
                                             </div>
                                             <p class="text-sm font-semibold text-slate-900">${{ number_format((float) $timelineOrder->total, 2) }}</p>
                                         </div>
 
                                         <div class="mt-2 flex items-center gap-3 text-sm">
-                                            <a href="{{ route('orders.edit', $timelineOrder) }}" class="text-amber-600 hover:text-amber-700 font-medium">Edit</a>
+                                            <a href="{{ route('orders.edit', $timelineOrder) }}" class="text-amber-600 hover:text-amber-700 font-medium">{{ __('Edit') }}</a>
                                             @if (empty($timelineOrder->shipped_at))
-                                                <form method="POST" action="{{ route('orders.mark-shipped', $timelineOrder) }}" onsubmit="return confirm('Mark order {{ $timelineOrder->number }} as shipped?');">
+                                                <form method="POST" action="{{ route('orders.mark-shipped', $timelineOrder) }}" onsubmit="return confirm('{{ __('Mark order :number as shipped?', ['number' => $timelineOrder->number]) }}');">
                                                     @csrf
                                                     @method('PATCH')
-                                                    <button type="submit" class="text-emerald-600 hover:text-emerald-700 font-medium">Mark as shipped</button>
+                                                    <button type="submit" class="text-emerald-600 hover:text-emerald-700 font-medium">{{ __('Mark as shipped') }}</button>
                                                 </form>
                                             @endif
                                         </div>
@@ -70,7 +86,7 @@
                     @endforeach
                 </div>
             @else
-                <p class="mt-3 text-sm text-slate-500">No orders found for timeline history.</p>
+                <p class="mt-3 text-sm text-slate-500">{{ __('No orders found for timeline history.') }}</p>
             @endif
         </div>
 
@@ -78,11 +94,11 @@
             <table class="min-w-full text-sm">
                 <thead class="bg-slate-50 text-slate-600">
                     <tr>
-                        <th class="px-4 py-3 text-left">Number</th>
-                        <th class="px-4 py-3 text-left">Client</th>
-                        <th class="px-4 py-3 text-left">Status</th>
-                        <th class="px-4 py-3 text-left">Total</th>
-                        <th class="px-4 py-3 text-left">Actions</th>
+                        <th class="px-4 py-3 text-left">{{ __('Number') }}</th>
+                        <th class="px-4 py-3 text-left">{{ __('Client') }}</th>
+                        <th class="px-4 py-3 text-left">{{ __('Status') }}</th>
+                        <th class="px-4 py-3 text-left">{{ __('Total') }}</th>
+                        <th class="px-4 py-3 text-left">{{ __('Actions') }}</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100">
@@ -96,18 +112,18 @@
                             <td class="px-4 py-3">${{ number_format((float) $order->total, 2) }}</td>
                             <td class="px-4 py-3">
                                 <div class="flex items-center gap-3">
-                                    <a href="{{ route('orders.edit', $order) }}" class="text-amber-600 hover:text-amber-700 font-medium">Edit</a>
-                                    <form method="POST" action="{{ route('orders.destroy', $order) }}" onsubmit="return confirm('Delete this order?');">
+                                    <a href="{{ route('orders.edit', $order) }}" class="text-amber-600 hover:text-amber-700 font-medium">{{ __('Edit') }}</a>
+                                    <form method="POST" action="{{ route('orders.destroy', $order) }}" onsubmit="return confirm('{{ __('Delete this order?') }}');">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="text-red-600 hover:text-red-700 font-medium">Delete</button>
+                                        <button type="submit" class="text-red-600 hover:text-red-700 font-medium">{{ __('Delete') }}</button>
                                     </form>
                                 </div>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="px-4 py-6 text-center text-slate-500">No orders found.</td>
+                            <td colspan="5" class="px-4 py-6 text-center text-slate-500">{{ __('No orders found.') }}</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -115,7 +131,7 @@
         </div>
 
         <div>
-            {{ $orders->links() }}
+            {{ $orders->withQueryString()->links() }}
         </div>
     </div>
 </x-app-layout>

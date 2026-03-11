@@ -1,14 +1,16 @@
 @php
     $menuItems = [
-        ['label' => 'Dashboard', 'route' => 'dashboard', 'active' => 'dashboard'],
-        ['label' => 'Clients', 'route' => 'clients.index', 'active' => 'clients.*'],
-        ['label' => 'Products', 'route' => 'products.index', 'active' => 'products.*'],
-        ['label' => 'Orders', 'route' => 'orders.index', 'active' => 'orders.*'],
-        ['label' => 'Invoices', 'route' => 'invoices.index', 'active' => 'invoices.*'],
-        ['label' => 'Inventory', 'route' => 'inventory.index', 'active' => 'inventory.*'],
-        ['label' => 'Employees', 'route' => 'employees.index', 'active' => 'employees.*'],
-        ['label' => 'Payrolls', 'route' => 'payrolls.index', 'active' => 'payrolls.*'],
-        ['label' => 'Warehouses', 'route' => 'warehouses.index', 'active' => 'warehouses.*'],
+        ['label' => __('Dashboard'), 'route' => 'dashboard', 'active' => 'dashboard'],
+        ['label' => __('Clients'), 'route' => 'clients.index', 'active' => 'clients.*'],
+        ['label' => __('Products'), 'route' => 'products.index', 'active' => 'products.*'],
+        ['label' => __('Orders'), 'route' => 'orders.index', 'active' => 'orders.*'],
+        ['label' => __('POS'), 'route' => 'pos.index', 'active' => 'pos.*'],
+        ['label' => __('Invoices'), 'route' => 'invoices.index', 'active' => 'invoices.*'],
+        ['label' => __('Inventory'), 'route' => 'inventory.index', 'active' => 'inventory.*'],
+        ['label' => __('Transactions'), 'route' => 'transactions.list', 'active' => 'transactions.*'],
+        ['label' => __('Employees'), 'route' => 'employees.index', 'active' => 'employees.*'],
+        ['label' => __('Payrolls'), 'route' => 'payrolls.index', 'active' => 'payrolls.*'],
+        ['label' => __('Warehouses'), 'route' => 'warehouses.index', 'active' => 'warehouses.*'],
     ];
 @endphp
 
@@ -18,7 +20,7 @@
             <a href="{{ route('dashboard') }}" class="flex items-center">
                 <x-application-logo class="block h-20 w-auto fill-current text-emerald-600" />
             </a>
-            <p class="mt-2 text-xs font-medium uppercase tracking-wide text-slate-400">Operations Center</p>
+            <p class="mt-2 text-xs font-medium uppercase tracking-wide text-slate-400">{{ __('Operations Center') }}</p>
         </div>
 
         <div class="flex-1 overflow-y-auto px-3 py-5 space-y-1">
@@ -55,6 +57,27 @@
                     </form>
                 </x-slot>
             </x-dropdown>
+
+            <div class="mt-3 flex items-center justify-between gap-2 text-xs text-slate-500">
+                <span>{{ __('Language') }}</span>
+                <div class="flex items-center gap-2">
+                    <form method="POST" action="{{ route('settings.locale') }}">
+                        @csrf
+                        <input type="hidden" name="locale" value="en" />
+                        <button type="submit" class="px-2 py-1 rounded-md border border-slate-200 text-slate-600 hover:bg-slate-50">EN</button>
+                    </form>
+                    <form method="POST" action="{{ route('settings.locale') }}">
+                        @csrf
+                        <input type="hidden" name="locale" value="fr" />
+                        <button type="submit" class="px-2 py-1 rounded-md border border-slate-200 text-slate-600 hover:bg-slate-50">FR</button>
+                    </form>
+                    <form method="POST" action="{{ route('settings.locale') }}">
+                        @csrf
+                        <input type="hidden" name="locale" value="pt" />
+                        <button type="submit" class="px-2 py-1 rounded-md border border-slate-200 text-slate-600 hover:bg-slate-50">PT</button>
+                    </form>
+                </div>
+            </div>
         </div>
     </div>
 </aside>
@@ -104,6 +127,27 @@
                         {{ __('Log Out') }}
                     </x-responsive-nav-link>
                 </form>
+            </div>
+
+            <div class="mt-3 px-4 text-xs text-slate-500">
+                <div class="mb-2">{{ __('Language') }}</div>
+                <div class="flex items-center gap-2">
+                    <form method="POST" action="{{ route('settings.locale') }}">
+                        @csrf
+                        <input type="hidden" name="locale" value="en" />
+                        <button type="submit" class="px-2 py-1 rounded-md border border-slate-200 text-slate-600 hover:bg-slate-50">EN</button>
+                    </form>
+                    <form method="POST" action="{{ route('settings.locale') }}">
+                        @csrf
+                        <input type="hidden" name="locale" value="fr" />
+                        <button type="submit" class="px-2 py-1 rounded-md border border-slate-200 text-slate-600 hover:bg-slate-50">FR</button>
+                    </form>
+                    <form method="POST" action="{{ route('settings.locale') }}">
+                        @csrf
+                        <input type="hidden" name="locale" value="pt" />
+                        <button type="submit" class="px-2 py-1 rounded-md border border-slate-200 text-slate-600 hover:bg-slate-50">PT</button>
+                    </form>
+                </div>
             </div>
         </div>
     </div>

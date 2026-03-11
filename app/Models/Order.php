@@ -40,7 +40,8 @@ class Order extends Model
 		'created_by' => 'int',
 		'total' => 'float',
 		'ordered_at' => 'datetime',
-		'shipped_at' => 'datetime'
+		'shipped_at' => 'datetime',
+		'paid_at' => 'datetime'
 	];
 
 	protected $fillable = [
@@ -48,9 +49,12 @@ class Order extends Model
 		'client_id',
 		'created_by',
 		'status',
+		'channel',
 		'total',
 		'ordered_at',
 		'shipped_at',
+		'paid_at',
+		'payment_method',
 		'notes'
 	];
 

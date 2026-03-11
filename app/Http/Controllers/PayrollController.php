@@ -43,16 +43,32 @@ class PayrollController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function list()
+    public function list(Request $request)
     {
+        $search = trim((string) $request->query('q', ''));
+
+        $query = Employee::query()
+            ->with(['user', 'payrolls' => function ($query) {
+                $query->latest('period_end');
+            }])
+            ->orderBy('employee_number')
+            ->orderBy('id');
+
+        if ($search !== '') {
+            $query->where(function ($builder) use ($search) {
+                $builder
+                    ->where('employee_number', 'like', '%'.$search.'%')
+                    ->orWhere('position', 'like', '%'.$search.'%')
+                    ->orWhereHas('user', function ($userQuery) use ($search) {
+                        $userQuery->where('name', 'like', '%'.$search.'%')
+                            ->orWhere('email', 'like', '%'.$search.'%');
+                    });
+            });
+        }
+
         return view('payrolls.list', [
-            'employees' => Employee::query()
-                ->with(['user', 'payrolls' => function ($query) {
-                    $query->latest('period_end');
-                }])
-                ->orderBy('employee_number')
-                ->orderBy('id')
-                ->paginate(15),
+            'employees' => $query->paginate(15)->withQueryString(),
+            'search' => $search,
         ]);
     }
 

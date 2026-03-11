@@ -40,10 +40,27 @@ class ClientController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function list()
+    public function list(Request $request)
     {
+        $search = trim((string) $request->query('q', ''));
+
+        $query = Client::query();
+
+        if ($search !== '') {
+            $query->where(function ($builder) use ($search) {
+                $builder
+                    ->where('company_name', 'like', '%'.$search.'%')
+                    ->orWhere('contact_name', 'like', '%'.$search.'%')
+                    ->orWhere('email', 'like', '%'.$search.'%')
+                    ->orWhere('phone', 'like', '%'.$search.'%')
+                    ->orWhere('city', 'like', '%'.$search.'%')
+                    ->orWhere('country', 'like', '%'.$search.'%');
+            });
+        }
+
         return view('clients.list', [
-            'clients' => Client::query()->latest()->paginate(15),
+            'clients' => $query->latest()->paginate(15)->withQueryString(),
+            'search' => $search,
         ]);
     }
 

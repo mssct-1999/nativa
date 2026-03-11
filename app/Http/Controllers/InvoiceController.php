@@ -45,10 +45,29 @@ class InvoiceController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function list()
+    public function list(Request $request)
     {
+        $search = trim((string) $request->query('q', ''));
+
+        $query = Invoice::query()->with(['client', 'user']);
+
+        if ($search !== '') {
+            $query->where(function ($builder) use ($search) {
+                $builder
+                    ->where('number', 'like', '%'.$search.'%')
+                    ->orWhere('status', 'like', '%'.$search.'%')
+                    ->orWhereHas('client', function ($clientQuery) use ($search) {
+                        $clientQuery->where('company_name', 'like', '%'.$search.'%');
+                    })
+                    ->orWhereHas('user', function ($userQuery) use ($search) {
+                        $userQuery->where('name', 'like', '%'.$search.'%');
+                    });
+            });
+        }
+
         return view('invoices.list', [
-            'invoices' => Invoice::query()->with(['client', 'user'])->latest()->paginate(15),
+            'invoices' => $query->latest()->paginate(15)->withQueryString(),
+            'search' => $search,
         ]);
     }
 
