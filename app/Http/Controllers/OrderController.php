@@ -7,6 +7,7 @@ use App\Models\Client;
 use App\Models\Order;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 
 class OrderController extends Controller
@@ -21,6 +22,22 @@ class OrderController extends Controller
     public function index()
     {
         $chart = $this->monthlyCountSeries(Order::class);
+        $fromDate = now()->subDays(30)->startOfDay();
+
+        $salesByHourRaw = Order::query()
+            ->selectRaw('HOUR(COALESCE(ordered_at, created_at)) as hour, COUNT(*) as total')
+            ->where('status', 'completed')
+            ->whereRaw('COALESCE(ordered_at, created_at) >= ?', [$fromDate])
+            ->groupBy(DB::raw('HOUR(COALESCE(ordered_at, created_at))'))
+            ->pluck('total', 'hour');
+
+        $salesByHour = [];
+        for ($hour = 0; $hour < 24; $hour++) {
+            $salesByHour[] = [
+                'hour' => $hour,
+                'total' => (int) ($salesByHourRaw[$hour] ?? 0),
+            ];
+        }
 
         return view('orders.index', [
             'pageDescription' => 'See order velocity, pipeline status, and revenue volume.',
@@ -36,6 +53,7 @@ class OrderController extends Controller
                 'labels' => $chart['labels'],
                 'values' => $chart['values'],
             ],
+            'salesByHour' => $salesByHour,
         ]);
     }
 

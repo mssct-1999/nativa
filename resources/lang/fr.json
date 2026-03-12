@@ -119,4 +119,9 @@
     "No payroll records for this employee.": "Aucune paie pour cet employe.",
     "Net": "Net",
     "Delete this payroll?": "Supprimer cette paie ?"
+    ,
+    "Profile Settings": "Parametres du profil",
+    "Profile updated.": "Profil mis a jour.",
+    "Profile photo": "Photo de profil",
+    "Save changes": "Enregistrer les modifications"
 }

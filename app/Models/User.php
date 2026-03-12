@@ -18,6 +18,7 @@ use Illuminate\Contracts\Auth\Access\Authorizable as AuthorizableContract;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * Class User
@@ -64,8 +65,18 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
 		'email',
 		'email_verified_at',
 		'password',
-		'remember_token'
+		'remember_token',
+		'profile_photo_path'
 	];
+
+	public function profilePhotoUrl(): string
+	{
+		if ($this->profile_photo_path) {
+			return Storage::url($this->profile_photo_path);
+		}
+
+		return 'https://ui-avatars.com/api/?name='.urlencode($this->name).'&background=0f172a&color=ffffff&size=128';
+	}
 
 	public function clients()
 	{

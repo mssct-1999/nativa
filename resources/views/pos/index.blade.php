@@ -32,6 +32,12 @@
                     </div>
                 </div>
 
+                <div>
+                    <label for="name_search" class="block text-sm font-medium text-slate-700">Search by name</label>
+                    <input id="name_search" type="text" placeholder="Start typing a product name" class="mt-1 w-full rounded-md border-slate-300" />
+                    <div id="name_results" class="mt-2 hidden rounded-md border border-slate-200 bg-white shadow-sm"></div>
+                </div>
+
                 <div id="scan_status" class="hidden rounded-md border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700"></div>
 
                 <div id="product_info" class="hidden rounded-lg border border-slate-200 bg-slate-50 p-4">
@@ -117,7 +123,14 @@
 
                 <div>
                     <label for="payment_method" class="block text-sm font-medium text-slate-700">Payment method</label>
-                    <input id="payment_method" type="text" class="mt-1 w-full rounded-md border-slate-300" placeholder="cash, card, transfer" />
+                    <select id="payment_method" class="mt-1 w-full rounded-md border-slate-300">
+                        <option value="">Select method</option>
+                        <option value="cash">Cash</option>
+                        <option value="card">Card</option>
+                        <option value="transfer">Bank transfer</option>
+                        <option value="mobile_money">Mobile money</option>
+                        <option value="other">Other</option>
+                    </select>
                 </div>
 
                 <div>
@@ -165,6 +178,8 @@
             const paidCheckbox = document.getElementById('paid');
             const accountSelect = document.getElementById('account_id');
             const paymentMethodInput = document.getElementById('payment_method');
+            const nameSearch = document.getElementById('name_search');
+            const nameResults = document.getElementById('name_results');
 
             const state = {
                 items: [],
@@ -243,6 +258,26 @@
                 productDescription.textContent = product.description || '';
             };
 
+            const addProductToCart = (product) => {
+                showProductInfo(product);
+
+                const existing = state.items.find((item) => item.product_id === product.id);
+                if (existing) {
+                    existing.quantity += 1;
+                } else {
+                    state.items.push({
+                        product_id: product.id,
+                        name: product.name,
+                        sku: product.sku,
+                        barcode: product.barcode,
+                        unit_price: product.price,
+                        quantity: 1,
+                    });
+                }
+
+                renderCart();
+            };
+
             const lookupBarcode = async () => {
                 const barcode = barcodeInput.value.trim();
                 if (!barcode) {
@@ -272,23 +307,7 @@
                     }
 
                     const product = await response.json();
-                    showProductInfo(product);
-
-                    const existing = state.items.find((item) => item.product_id === product.id);
-                    if (existing) {
-                        existing.quantity += 1;
-                    } else {
-                        state.items.push({
-                            product_id: product.id,
-                            name: product.name,
-                            sku: product.sku,
-                            barcode: product.barcode,
-                            unit_price: product.price,
-                            quantity: 1,
-                        });
-                    }
-
-                    renderCart();
+                    addProductToCart(product);
                     setStatus(scanStatus, `${product.name} added to cart.`, 'success');
                     barcodeInput.value = '';
                     barcodeInput.focus();
@@ -301,6 +320,64 @@
                 if (event.key === 'Enter') {
                     event.preventDefault();
                     lookupBarcode();
+                }
+            });
+
+            let searchTimeout = null;
+            nameSearch.addEventListener('input', () => {
+                clearTimeout(searchTimeout);
+                const query = nameSearch.value.trim();
+
+                if (query.length < 2) {
+                    nameResults.classList.add('hidden');
+                    nameResults.innerHTML = '';
+                    return;
+                }
+
+                searchTimeout = setTimeout(async () => {
+                    try {
+                        const response = await fetch(`{{ route('pos.search') }}?q=${encodeURIComponent(query)}&warehouse_id=${warehouseSelect.value}`, {
+                            headers: { 'Accept': 'application/json' },
+                        });
+                        const payload = await response.json();
+                        const results = payload.results || [];
+
+                        if (!results.length) {
+                            nameResults.innerHTML = '<div class="px-3 py-2 text-sm text-slate-500">No products found.</div>';
+                            nameResults.classList.remove('hidden');
+                            return;
+                        }
+
+                        nameResults.innerHTML = results.map((product, idx) => `
+                            <button type="button" data-index="${idx}" class="w-full text-left px-3 py-2 hover:bg-slate-50 text-sm">
+                                <div class="font-medium text-slate-900">${product.name}</div>
+                                <div class="text-xs text-slate-500">SKU: ${product.sku || '-'} | Available: ${product.available.toFixed(2)}</div>
+                            </button>
+                        `).join('');
+
+                        nameResults.classList.remove('hidden');
+
+                        Array.from(nameResults.querySelectorAll('button[data-index]')).forEach((button) => {
+                            button.addEventListener('click', () => {
+                                const product = results[Number(button.dataset.index)];
+                                addProductToCart(product);
+                                setStatus(scanStatus, `${product.name} added to cart.`, 'success');
+                                nameResults.classList.add('hidden');
+                                nameResults.innerHTML = '';
+                                nameSearch.value = '';
+                                nameSearch.focus();
+                            });
+                        });
+                    } catch (error) {
+                        nameResults.classList.add('hidden');
+                        nameResults.innerHTML = '';
+                    }
+                }, 250);
+            });
+
+            document.addEventListener('click', (event) => {
+                if (!nameResults.contains(event.target) && event.target !== nameSearch) {
+                    nameResults.classList.add('hidden');
                 }
             });
 

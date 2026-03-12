@@ -38,17 +38,20 @@
 
             <div class="mt-4 overflow-x-auto">
                 <div class="min-w-[900px]">
-                    <div class="flex items-end gap-2 h-48 rounded-lg border border-slate-100 bg-slate-50 px-3 py-4">
+                    <div class="flex items-center gap-2 h-56 rounded-lg border border-slate-100 bg-slate-50 px-3 py-4">
                         @foreach ($dailyMovements as $index => $row)
                             @php
                                 $inHeight = $maxValue > 0 ? (($row['in'] / $maxValue) * 100) : 0;
                                 $outHeight = $maxValue > 0 ? (($row['out'] / $maxValue) * 100) : 0;
                                 $showLabel = ($index % 5) === 0;
                             @endphp
-                            <div class="flex flex-col items-center justify-end w-6">
-                                <div class="flex flex-col items-center justify-end h-36 w-full">
+                            <div class="flex flex-col items-center w-6">
+                                <div class="h-20 w-full flex items-end justify-center">
                                     <div class="w-3 rounded-t-md bg-emerald-500" style="height: {{ $inHeight }}%;" title="In: {{ number_format((float) $row['in'], 2) }}"></div>
-                                    <div class="mt-1 w-3 rounded-t-md bg-rose-500" style="height: {{ $outHeight }}%;" title="Out: {{ number_format((float) $row['out'], 2) }}"></div>
+                                </div>
+                                <div class="h-px w-full bg-slate-200"></div>
+                                <div class="h-20 w-full flex items-start justify-center">
+                                    <div class="w-3 rounded-b-md bg-rose-500" style="height: {{ $outHeight }}%;" title="Out: {{ number_format((float) $row['out'], 2) }}"></div>
                                 </div>
                                 <div class="mt-1 text-[10px] text-slate-500">{{ $showLabel ? $row['date'] : '' }}</div>
                             </div>

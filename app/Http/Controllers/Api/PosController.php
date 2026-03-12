@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\Controller;
 use App\Models\Account;
-use App\Models\Client;
 use App\Models\Inventory;
 use App\Models\InventoryMovement;
 use App\Models\Invoice;
@@ -13,7 +13,6 @@ use App\Models\OrderItem;
 use App\Models\Payment;
 use App\Models\Product;
 use App\Models\Transaction;
-use App\Models\Warehouse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -22,15 +21,6 @@ use Illuminate\Validation\ValidationException;
 
 class PosController extends Controller
 {
-    public function index()
-    {
-        return view('pos.index', [
-            'clients' => Client::query()->orderBy('company_name')->get(),
-            'warehouses' => Warehouse::query()->orderBy('name')->get(),
-            'accounts' => Account::query()->orderBy('name')->get(),
-        ]);
-    }
-
     public function lookup(Request $request)
     {
         $validated = $request->validate([
@@ -216,7 +206,6 @@ class PosController extends Controller
             }
 
             $invoice = null;
-
             if ($validated['issue_invoice']) {
                 $invoiceNumber = $this->generateInvoiceNumber();
                 $issuedAt = now();
@@ -285,7 +274,6 @@ class PosController extends Controller
         return response()->json([
             'message' => 'Order saved successfully.',
             'order_id' => $result->id,
-            'redirect' => route('orders.list'),
         ]);
     }
 

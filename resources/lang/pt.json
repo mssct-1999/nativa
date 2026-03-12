@@ -118,5 +118,9 @@
     "Payrolls": "Folhas de pagamento",
     "No payroll records for this employee.": "Nenhuma folha para este funcionario.",
     "Net": "Liquido",
-    "Delete this payroll?": "Excluir esta folha?"
+    "Delete this payroll?": "Excluir esta folha?",
+    "Profile Settings": "Configuracoes do perfil",
+    "Profile updated.": "Perfil atualizado.",
+    "Profile photo": "Foto de perfil",
+    "Save changes": "Salvar alteracoes"
 }

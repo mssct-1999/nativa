@@ -8,6 +8,7 @@ use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PosController;
 use App\Http\Controllers\TransactionController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\PayrollController;
 use App\Http\Controllers\WarehouseController;
@@ -66,6 +67,7 @@ Route::middleware('auth')->group(function() {
     // POS + TRANSACTIONS
     Route::get('pos', [PosController::class, 'index'])->name('pos.index');
     Route::post('pos/lookup', [PosController::class, 'lookup'])->name('pos.lookup');
+    Route::get('pos/search', [PosController::class, 'search'])->name('pos.search');
     Route::post('pos/checkout', [PosController::class, 'checkout'])->name('pos.checkout');
 
     Route::get('transactions', [TransactionController::class, 'index'])->name('transactions.list');
@@ -81,6 +83,10 @@ Route::middleware('auth')->group(function() {
 
         return redirect()->back();
     })->name('settings.locale');
+
+    // PROFILE
+    Route::get('profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::post('profile', [ProfileController::class, 'update'])->name('profile.update');
 });
 
 require __DIR__.'/auth.php';

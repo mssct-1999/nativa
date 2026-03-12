@@ -64,6 +64,24 @@ class ProductController extends Controller
      */
     public function list(Request $request)
     {
+        // Test barcode scanner - return random product
+        if ($request->query('get_random') === '1') {
+            $product = Product::query()
+                ->where('active', true)
+                ->inRandomOrder()
+                ->first();
+            
+            if (!$product) {
+                return response()->json(['barcode' => null, 'message' => 'No active products found'], 404);
+            }
+            
+            return response()->json([
+                'barcode' => $product->barcode,
+                'name' => $product->name,
+                'sku' => $product->sku
+            ]);
+        }
+
         $search = trim((string) $request->query('q', ''));
 
         $query = Product::query();

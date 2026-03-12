@@ -31,54 +31,7 @@
             @endforeach
         </div>
 
-        <div class="px-4 py-4 border-t border-slate-200">
-            <x-dropdown align="right" width="48">
-                <x-slot name="trigger">
-                    <button class="flex items-center w-full rounded-lg border border-slate-200 px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 transition">
-                        <div class="text-left flex-1 truncate">{{ Auth::user()->name }}</div>
-
-                        <div class="ml-2">
-                            <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
-                            </svg>
-                        </div>
-                    </button>
-                </x-slot>
-
-                <x-slot name="content">
-                    <form method="POST" action="{{ route('logout') }}">
-                        @csrf
-
-                        <x-dropdown-link :href="route('logout')"
-                                onclick="event.preventDefault();
-                                            this.closest('form').submit();">
-                            {{ __('Log Out') }}
-                        </x-dropdown-link>
-                    </form>
-                </x-slot>
-            </x-dropdown>
-
-            <div class="mt-3 flex items-center justify-between gap-2 text-xs text-slate-500">
-                <span>{{ __('Language') }}</span>
-                <div class="flex items-center gap-2">
-                    <form method="POST" action="{{ route('settings.locale') }}">
-                        @csrf
-                        <input type="hidden" name="locale" value="en" />
-                        <button type="submit" class="px-2 py-1 rounded-md border border-slate-200 text-slate-600 hover:bg-slate-50">EN</button>
-                    </form>
-                    <form method="POST" action="{{ route('settings.locale') }}">
-                        @csrf
-                        <input type="hidden" name="locale" value="fr" />
-                        <button type="submit" class="px-2 py-1 rounded-md border border-slate-200 text-slate-600 hover:bg-slate-50">FR</button>
-                    </form>
-                    <form method="POST" action="{{ route('settings.locale') }}">
-                        @csrf
-                        <input type="hidden" name="locale" value="pt" />
-                        <button type="submit" class="px-2 py-1 rounded-md border border-slate-200 text-slate-600 hover:bg-slate-50">PT</button>
-                    </form>
-                </div>
-            </div>
-        </div>
+        <div class="px-4 py-4 border-t border-slate-200"></div>
     </div>
 </aside>
 
@@ -111,44 +64,6 @@
             </x-responsive-nav-link>
         @endforeach
 
-        <div class="pt-4 pb-1 border-t border-slate-200">
-            <div class="px-4">
-                <div class="font-medium text-base text-slate-800">{{ Auth::user()->name }}</div>
-                <div class="font-medium text-sm text-slate-500">{{ Auth::user()->email }}</div>
-            </div>
-
-            <div class="mt-3 space-y-1">
-                <form method="POST" action="{{ route('logout') }}">
-                    @csrf
-
-                    <x-responsive-nav-link :href="route('logout')"
-                            onclick="event.preventDefault();
-                                        this.closest('form').submit();">
-                        {{ __('Log Out') }}
-                    </x-responsive-nav-link>
-                </form>
-            </div>
-
-            <div class="mt-3 px-4 text-xs text-slate-500">
-                <div class="mb-2">{{ __('Language') }}</div>
-                <div class="flex items-center gap-2">
-                    <form method="POST" action="{{ route('settings.locale') }}">
-                        @csrf
-                        <input type="hidden" name="locale" value="en" />
-                        <button type="submit" class="px-2 py-1 rounded-md border border-slate-200 text-slate-600 hover:bg-slate-50">EN</button>
-                    </form>
-                    <form method="POST" action="{{ route('settings.locale') }}">
-                        @csrf
-                        <input type="hidden" name="locale" value="fr" />
-                        <button type="submit" class="px-2 py-1 rounded-md border border-slate-200 text-slate-600 hover:bg-slate-50">FR</button>
-                    </form>
-                    <form method="POST" action="{{ route('settings.locale') }}">
-                        @csrf
-                        <input type="hidden" name="locale" value="pt" />
-                        <button type="submit" class="px-2 py-1 rounded-md border border-slate-200 text-slate-600 hover:bg-slate-50">PT</button>
-                    </form>
-                </div>
-            </div>
-        </div>
+        <div class="pt-4 pb-1 border-t border-slate-200"></div>
     </div>
 </div>
