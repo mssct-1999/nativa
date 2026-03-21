@@ -32,6 +32,7 @@ use Illuminate\Support\Facades\DB;
  * @property Collection|ProductionPlan[] $production_plans
  * @property Collection|QuoteItem[] $quote_items
  * @property Collection|WorkOrder[] $work_orders
+ * @property Collection|ShopProduct[] $shop_products
  *
  * @package App\Models
  */
@@ -116,5 +117,10 @@ class Product extends Model
 	public function work_orders()
 	{
 		return $this->hasMany(WorkOrder::class);
+	}
+
+	public function shop_products()
+	{
+		return $this->hasMany(ShopProduct::class);
 	}
 }

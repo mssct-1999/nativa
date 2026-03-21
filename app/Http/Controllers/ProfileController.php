@@ -33,7 +33,7 @@ class ProfileController extends Controller
             }
 
             $path = $request->file('profile_photo')->store('profile-photos', 'public');
-            $user->profile_photo_path = $path;
+            $user->profile_photo_path = str_replace('\\', '/', $path);
         }
 
         $user->save();

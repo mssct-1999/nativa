@@ -72,7 +72,10 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
 	public function profilePhotoUrl(): string
 	{
 		if ($this->profile_photo_path) {
-			return Storage::url($this->profile_photo_path);
+			$path = str_replace('\\', '/', $this->profile_photo_path);
+			if (Storage::disk('public')->exists($path)) {
+				return asset('storage/'.$path);
+			}
 		}
 
 		return 'https://ui-avatars.com/api/?name='.urlencode($this->name).'&background=0f172a&color=ffffff&size=128';
@@ -123,6 +126,36 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
 		return $this->belongsToMany(Role::class)
 					->withPivot('id')
 					->withTimestamps();
+	}
+
+	public function shop_customer()
+	{
+		return $this->hasOne(ShopCustomer::class);
+	}
+
+	public function hasRole(string $role): bool
+	{
+		return $this->roles()->where('name', $role)->exists();
+	}
+
+	public function isAdmin(): bool
+	{
+		if ($this->roles()->count() === 0) {
+			return true;
+		}
+
+		return $this->hasRole('admin');
+	}
+
+	public function assignRole(string $role): void
+	{
+		$roleModel = Role::query()->firstOrCreate(['name' => $role], [
+			'label' => ucfirst($role),
+		]);
+
+		if (! $this->roles()->where('roles.id', $roleModel->id)->exists()) {
+			$this->roles()->attach($roleModel->id);
+		}
 	}
 
 	public function sales_pipelines()

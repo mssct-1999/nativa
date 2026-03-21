@@ -3,6 +3,8 @@
         ['label' => __('Dashboard'), 'route' => 'dashboard', 'active' => 'dashboard'],
         ['label' => __('Clients'), 'route' => 'clients.index', 'active' => 'clients.*'],
         ['label' => __('Products'), 'route' => 'products.index', 'active' => 'products.*'],
+        ['label' => __('Shops'), 'route' => 'shops.index', 'active' => 'shops.*'],
+        ['label' => __('Shop Customers'), 'route' => 'shop-customers.index', 'active' => 'shop-customers.*'],
         ['label' => __('Orders'), 'route' => 'orders.index', 'active' => 'orders.*'],
         ['label' => __('POS'), 'route' => 'pos.index', 'active' => 'pos.*'],
         ['label' => __('Invoices'), 'route' => 'invoices.index', 'active' => 'invoices.*'],

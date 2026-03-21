@@ -37,8 +37,11 @@ class Order extends Model
 
 	protected $casts = [
 		'client_id' => 'int',
+		'shop_id' => 'int',
+		'shop_customer_id' => 'int',
 		'created_by' => 'int',
 		'total' => 'float',
+		'discount' => 'float',
 		'ordered_at' => 'datetime',
 		'shipped_at' => 'datetime',
 		'paid_at' => 'datetime'
@@ -47,10 +50,13 @@ class Order extends Model
 	protected $fillable = [
 		'number',
 		'client_id',
+		'shop_id',
+		'shop_customer_id',
 		'created_by',
 		'status',
 		'channel',
 		'total',
+		'discount',
 		'ordered_at',
 		'shipped_at',
 		'paid_at',
@@ -61,6 +67,16 @@ class Order extends Model
 	public function client()
 	{
 		return $this->belongsTo(Client::class);
+	}
+
+	public function shop()
+	{
+		return $this->belongsTo(Shop::class);
+	}
+
+	public function shop_customer()
+	{
+		return $this->belongsTo(ShopCustomer::class);
 	}
 
 	public function user()
